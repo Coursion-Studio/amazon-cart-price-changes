@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2 — 2026-11-02
+
+- A shimmering placeholder while a picture is being looked up; the frame icon
+  only appears once every lookup has failed.
+
 ## 1.1.1 — 2026-11-02
 
 - Pictures for remembered items that are not on the page: Amazon's image

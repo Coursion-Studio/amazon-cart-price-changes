@@ -1049,3 +1049,29 @@
     transition: none;
   }
 }
+
+#apc-panel .apc-thumb-loading {
+  display: inline-block;
+  background: linear-gradient(90deg, #ecebe7 25%, #f8f7f4 50%, #ecebe7 75%);
+  background-size: 200% 100%;
+  animation: apc-shimmer 1.3s linear infinite;
+}
+#apc-panel .apc-card-media .apc-thumb-loading {
+  width: 98px;
+  height: 98px;
+  border-radius: 14px;
+}
+@keyframes apc-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #apc-panel .apc-thumb-loading {
+    animation: none;
+    background: #f0efec;
+  }
+}

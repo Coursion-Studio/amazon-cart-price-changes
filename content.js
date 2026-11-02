@@ -189,6 +189,7 @@
     hidden: [],
     expanded: new Set(),
     imageFetches: new Set(),
+    imagePending: new Set(),
     query: '',
     showTags: false,
     tracked: 0,
@@ -326,18 +327,20 @@
     for (const item of todo) {
       item.hist.imageTriedAt = now;
       state.imageFetches.add(item.key);
+      state.imagePending.add(item.key);
     }
     store.set(HISTORY_KEY, history);
     (async () => {
       for (const item of todo) {
         try {
           const res = await fetch(location.origin + '/dp/' + item.key, { credentials: 'same-origin', headers: { Accept: 'text/html' } });
-          if (!res.ok) continue;
-          const url = APC.productImageFromHTML(await res.text());
-          if (!isGoodImageURL(url)) continue;
-          rememberImage(item.key, url);
-          schedule();
+          if (res.ok) {
+            const url = APC.productImageFromHTML(await res.text());
+            if (isGoodImageURL(url)) rememberImage(item.key, url);
+          }
         } catch (e) {}
+        state.imagePending.delete(item.key);
+        schedule();
       }
     })();
   }
@@ -537,19 +540,29 @@
     if (item.image) return el('img', { class: cls, src: item.image, alt: '', loading: 'lazy', decoding: 'async' });
     const asin = /^[A-Z0-9]{10}$/.test(item.key) ? item.key : null;
     if (!asin || location.protocol === 'file:') return empty();
+    const box = el('span', { class: cls + ' apc-thumb-loading', 'aria-hidden': 'true' });
     let idx = 0;
-    const img = el('img', { class: cls, src: asinImageURL(asin, IMAGE_LOCALES[0]), alt: '', loading: 'lazy', decoding: 'async' });
+    const probe = new Image();
+    probe.decoding = 'async';
+    const settle = () => {
+      if (box.isConnected && !state.imagePending.has(asin)) box.replaceWith(empty());
+    };
     const next = () => {
       idx++;
-      if (idx < IMAGE_LOCALES.length) img.src = asinImageURL(asin, IMAGE_LOCALES[idx]);
-      else if (img.isConnected) img.replaceWith(empty());
+      if (idx < IMAGE_LOCALES.length) probe.src = asinImageURL(asin, IMAGE_LOCALES[idx]);
+      else settle();
     };
-    img.addEventListener('error', next);
-    img.addEventListener('load', () => {
-      if (img.naturalWidth <= 1) next();
-      else rememberImage(asin, img.src);
+    probe.addEventListener('error', next);
+    probe.addEventListener('load', () => {
+      if (probe.naturalWidth <= 1) {
+        next();
+        return;
+      }
+      rememberImage(asin, probe.src);
+      if (box.isConnected) box.replaceWith(el('img', { class: cls, src: probe.src, alt: '', decoding: 'async' }));
     });
-    return img;
+    probe.src = asinImageURL(asin, IMAGE_LOCALES[0]);
+    return box;
   }
 
   function chip(text, cls, title) {
@@ -1309,11 +1322,11 @@
     state.anchor = live.length ? anchorFor(live) : fallbackAnchor();
     const target = state.anchor.node;
     if (!target || !target.parentNode) return;
+    fetchMissingImages(items, now);
     const panel = render(items, state.summary);
     if (state.anchor.after) target.insertAdjacentElement('afterend', panel);
     else target.parentNode.insertBefore(panel, target);
     if (live.length) hideOriginals(live, state.anchor);
-    fetchMissingImages(items, now);
   }
 
   let timer = null;
