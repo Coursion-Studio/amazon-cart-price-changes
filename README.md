@@ -46,11 +46,25 @@ Works in Dia, Chrome, Arc, Brave, Edge, Vivaldi and other Chromium browsers.
 [amazon-cart-price-changes.user.js](https://raw.githubusercontent.com/Coursion-Studio/amazon-cart-price-changes/main/amazon-cart-price-changes.user.js)
 and confirm. Updates arrive on their own.
 
+**Homebrew (macOS).**
+
+```bash
+brew install Coursion-Studio/tools/amazon-cart-price-changes
+```
+
+It puts the extension at `$(brew --prefix)/share/amazon-cart-price-changes`
+and prints the two steps to load it: open `dia://extensions` (or
+`chrome://extensions`), turn on **Developer mode**, click **Load unpacked** and
+choose that folder. `brew upgrade` updates the files in place; click the
+reload icon on the extension's card afterwards.
+
 **Unpacked extension.** Download the zip from the
 [latest release](https://github.com/Coursion-Studio/amazon-cart-price-changes/releases/latest)
-and unzip it, or clone this repo. Then open `dia://extensions` (or
-`chrome://extensions`), turn on **Developer mode**, click **Load unpacked** and
-choose the folder.
+and unzip it, or clone this repo. Then load the folder the same way.
+
+**Firefox.** The release also carries `…-firefox.zip`; load it from
+`about:debugging` → This Firefox → Load Temporary Add-on, or install it from
+Firefox Add-ons once the listing is up.
 
 Then open your Amazon cart. Scroll through the saved-for-later list once per
 visit: Amazon only loads those items as you reach them.
@@ -61,7 +75,8 @@ visit: Amazon only loads those items as you reach them.
 npm test              # parser and history unit tests (node --test)
 npm run shot          # headless Chrome screenshot of test/cart/fixture.html
 npm run store-shots   # 1280x800 store screenshots + 440x280 promo tile into store/
-npm run package       # builds the userscript and dist/<name>-<version>.zip
+npm run package       # userscript + dist/<name>-<version>.zip (Chrome/Edge/Dia) + -firefox.zip
+scripts/update-formula.sh   # after a GitHub release: refresh the Homebrew formula's url + sha256
 ```
 
 `parse.js` is the pure part: price and direction parsing, the price history

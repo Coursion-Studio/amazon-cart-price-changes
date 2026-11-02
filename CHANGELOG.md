@@ -14,3 +14,5 @@ First public release.
   markers, lowest-seen badge, CSV export, diagnostics copy.
 - Turkish and English interface, follows the page language. No permissions,
   no network calls of its own.
+- Distribution: Chrome Web Store package, userscript build, Firefox package,
+  Homebrew formula in the Coursion-Studio/tools tap.

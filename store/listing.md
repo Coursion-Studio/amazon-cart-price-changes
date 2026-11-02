@@ -107,6 +107,12 @@ https://github.com/Coursion-Studio/amazon-cart-price-changes/blob/main/PRIVACY.m
   updated. No store, no review.
 - **GitHub release:** attach the zip and the userscript; people load the
   unzipped folder with Developer mode.
-- **Microsoft Edge Add-ons** (free registration) and **Firefox Add-ons**
-  (free; needs a `browser_specific_settings.gecko.id` in the manifest) take
-  the same package if you want them later.
+- **Homebrew:** `Formula/amazon-cart-price-changes.rb` in the public
+  `Coursion-Studio/homebrew-tools` tap installs the unpacked folder under
+  `$(brew --prefix)/share` and prints the load steps. After each GitHub
+  release run `scripts/update-formula.sh`, then commit and push the tap.
+- **Firefox Add-ons** (https://addons.mozilla.org/developers/, free): upload
+  `dist/<name>-<version>-firefox.zip` (Manifest V2 build with a Gecko id).
+  Listed extensions are reviewed; self-distributed ones are signed in minutes.
+- **Microsoft Edge Add-ons** (https://partner.microsoft.com/dashboard/microsoftedge,
+  free): upload the same zip as the Chrome Web Store.
