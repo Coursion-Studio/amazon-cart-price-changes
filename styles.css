@@ -1075,3 +1075,45 @@
     background: #f0efec;
   }
 }
+
+#apc-panel .apc-chip.target {
+  background: var(--apc-accent-soft);
+  color: var(--apc-accent-text);
+}
+#apc-panel .apc-stat-cart {
+  margin-top: 1px;
+}
+#apc-panel .apc-target {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+#apc-panel .apc-target .apc-detail-label {
+  margin: 0;
+}
+#apc-panel .apc-target-input {
+  width: 110px;
+  height: 26px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--apc-ink);
+  background: var(--apc-surface);
+  border: 1px solid rgba(11, 11, 11, 0.18);
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+#apc-panel .apc-target-input:focus {
+  outline: none;
+  border-color: var(--apc-accent);
+  box-shadow: 0 0 0 3px rgba(42, 120, 214, 0.2);
+}
+#apc-panel .apc-btn-small {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+#apc-panel .apc-card-details .apc-target {
+  margin-top: 4px;
+}

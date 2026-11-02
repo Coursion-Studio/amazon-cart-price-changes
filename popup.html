@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=360">
+  <title>Cart Price Changes</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="head">
+    <img class="logo" src="icons/icon48.png" width="32" height="32" alt="">
+    <div class="head-text">
+      <h1 id="title">Cart Price Changes</h1>
+      <p id="status" class="status"></p>
+    </div>
+  </header>
+
+  <section class="card" id="alerts">
+    <label class="toggle">
+      <span id="toggle-label">Alert me about price drops</span>
+      <input type="checkbox" id="enabled" role="switch">
+      <span class="switch" aria-hidden="true"></span>
+    </label>
+    <div class="row">
+      <label class="field">
+        <span id="threshold-label">Drop of at least</span>
+        <select id="threshold"></select>
+      </label>
+      <label class="field">
+        <span id="interval-label">Check every</span>
+        <select id="interval"></select>
+      </label>
+    </div>
+    <div class="row actions">
+      <button type="button" id="check" class="btn">Check now</button>
+      <span id="result" class="result"></span>
+    </div>
+    <p id="note" class="note" hidden></p>
+  </section>
+
+  <section class="section">
+    <h2 id="drops-title">Recent drops</h2>
+    <ul id="drops" class="list"></ul>
+  </section>
+
+  <section class="section" id="targets-section" hidden>
+    <h2 id="targets-title">Price targets</h2>
+    <ul id="targets" class="targets"></ul>
+  </section>
+
+  <footer class="foot">
+    <div id="carts" class="carts"></div>
+    <a id="github" href="https://github.com/Coursion-Studio/amazon-cart-price-changes" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+
+  <script src="parse.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

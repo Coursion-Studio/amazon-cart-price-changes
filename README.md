@@ -40,7 +40,10 @@ record so the picture is always there and grows over time.
 | **Summary row** | How many items dropped or rose and by how much, the biggest move each way with its picture. The tiles are filters: click *Dropped* to see only drops. |
 | **Period** | Today, 2 days, 7 days, 30 days or all time. Each row shows the change over that period, however many steps lie between, and the summary follows. |
 | **History** | On every visit the extension reads the current price of every item in your cart and saved-for-later list and records a point when a price moved. Amazon's own notices are folded in. Click any product for its full history. |
-| **Signals** | A blue dot on everything that changed since your last visit. A *Lowest seen* badge when a price is at its lowest recorded. |
+| **Alerts** | Turn them on in the toolbar popup and the extension checks your cart on a schedule you choose, even with no Amazon tab open, and notifies you when an item drops by your chosen percentage or reaches your target price. The icon shows the number of new drops. |
+| **Targets** | Set a target price in any product's details. It shows as a chip on the card and fires an alert when reached. |
+| **Signals** | A blue dot on everything that changed since your last visit. *Lowest seen*, *3 drops in a row*, *Back to an earlier price*, *Target reached*. |
+| **Cart total** | The first tile shows what everything in your cart costs now and how that moved over the period. |
 | **Also** | Search, sort menu, collapse, CSV export, English and Turkish interface following the page language. |
 
 <p align="center">
@@ -65,6 +68,7 @@ Pick whichever fits. All of them give you the same extension.
 | **Homebrew** (macOS) | Dia, Chrome, Arc, Brave, Edge | `brew upgrade` | `brew install Coursion-Studio/tools/amazon-cart-price-changes`, then load the folder it prints |
 | **Release zip** | Dia, Chrome, Arc, Brave, Edge | Manual | Download from [Releases](https://github.com/Coursion-Studio/amazon-cart-price-changes/releases/latest), unzip, load the folder |
 | **Firefox zip** | Firefox | Manual | `…-firefox.zip` from Releases, via `about:debugging` → Load Temporary Add-on |
+| **Safari** (macOS) | Safari | Manual | Open `safari/` in Xcode, run the app once, enable the extension in Safari → Settings → Extensions |
 | **Chrome Web Store** | Dia, Chrome, Arc, Brave, Edge | Automatic | Listing in review; the link will appear here |
 
 **Loading a folder** (Homebrew or zip): open `dia://extensions` or `chrome://extensions`,
@@ -81,8 +85,14 @@ only record what is on the page.
   Amazon's price-change notices (if any) and the name, price and picture of
   each item in the cart and saved-for-later lists.
 - Every price is stored as a point `{ time, price }` per product in the
-  browser's local storage for that Amazon site. A new point is added only when
-  the price moved. Amazon's "was X, now Y" notices add the earlier price too.
+  browser's extension storage, keyed by Amazon site. A new point is added only
+  when the price moved. Amazon's "was X, now Y" notices add the earlier price
+  too.
+- With alerts on, `background.js` fetches your cart page (and the pages of
+  tracked products that were not in it) on the chosen interval, records the
+  prices the same way, and notifies you about drops. It only does this after
+  you grant the alarms, notifications and Amazon-site permissions from the
+  popup; nothing is requested at install.
 - For the chosen period, a product's change is the price just before the
   period against the price now. Nothing changed in the period means the
   product is not listed.
@@ -95,10 +105,12 @@ Supported storefronts: amazon.com.tr, amazon.com, .co.uk, .de, .fr, .it, .es,
 
 ## Privacy
 
-Nothing leaves your browser. No account, no server, no analytics, no
-permissions. The only network requests go to the Amazon site you are on:
-product pictures, and a product's own page when a remembered item has no
-picture. Details in [PRIVACY.md](PRIVACY.md).
+Nothing leaves your browser. No account, no server, no analytics. The only
+install-time permission is `storage` for its own data. The only network
+requests go to your Amazon site: product pictures, a product's own page when a
+remembered item has no picture, and, with alerts on, your cart page and
+tracked product pages on the schedule you chose. Details in
+[PRIVACY.md](PRIVACY.md).
 
 ## Development
 
@@ -107,16 +119,21 @@ npm test               # unit tests for parsing, history and formatting (node --
 npm run shot           # screenshot the demo cart at test/cart/fixture.html
 npm run store-shots    # 1280x800 store screenshots, README images and the promo tile
 npm run package        # userscript + Chrome/Edge/Dia zip + Firefox zip into dist/
+npm run safari         # regenerate safari/ (Xcode project) from the packaged extension and build it
 scripts/update-formula.sh   # after a GitHub release: refresh the Homebrew formula
 ```
 
 Layout:
 
 ```
-manifest.json        MV3 manifest, content script on Amazon storefronts
-parse.js             pure: prices, direction words, history model, periods, sorting, formatting
+manifest.json        MV3 manifest, content script on Amazon storefronts, worker, popup
+parse.js             pure: prices, direction words, history model, periods, signals, formatting
+scan.js              pure: cart page and product page HTML parsers for the worker
 content.js           the page: find Amazon's notices and list items, build and refresh the panel
+background.js        alerts: scheduled checks, notifications, toolbar badge
+popup.html/js/css    toolbar popup: alert settings, check now, recent drops, targets
 styles.css           scoped to #apc-panel
+safari/              Xcode project for Safari, generated by scripts/safari.sh
 test/parse.test.js   unit tests
 test/make-fixture.py generates test/cart/fixture.html, a demo cart with made-up products
 scripts/             package, userscript build, screenshots, Homebrew formula update
@@ -140,8 +157,11 @@ image service by ASIN and then fetches that product's page on the same site
 once to read its picture. If a storefront's markup differs, click **Copy
 diagnostics** in the footer and open an issue with the result.
 
-**Safari?** Not yet. Safari needs an Xcode wrapper; the code has no
-Chrome-specific API, so it would be a packaging job.
+**Safari?** Open the project in `safari/` with Xcode, run it once, then enable
+the extension in Safari → Settings → Extensions (for an unsigned local build,
+also tick Develop → Allow Unsigned Extensions). Alerts use scheduled checks;
+Safari has no notification API for extensions, so there the badge and the
+popup carry the news.
 
 ## Not affiliated with Amazon
 

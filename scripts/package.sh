@@ -7,7 +7,7 @@ DESC_LEN=$(node -p "require('./manifest.json').description.length")
 if [ "$DESC_LEN" -gt 132 ]; then echo "manifest description is $DESC_LEN chars; the Chrome Web Store allows 132" >&2; exit 1; fi
 node --check parse.js && node --check content.js
 mkdir -p dist
-FILES="parse.js content.js styles.css icons/icon16.png icons/icon48.png icons/icon128.png LICENSE"
+FILES="parse.js scan.js content.js background.js styles.css popup.html popup.js popup.css icons/icon16.png icons/icon48.png icons/icon128.png LICENSE"
 
 OUT="dist/${NAME}-${VERSION}.zip"
 rm -f "$OUT"
@@ -22,6 +22,10 @@ const ff = {
   name: m.name, short_name: m.short_name, version: m.version, description: m.description,
   author: m.author, homepage_url: m.homepage_url, icons: m.icons,
   browser_specific_settings: { gecko: { id: "amazon-cart-price-changes@coursion.studio", strict_min_version: "109.0" } },
+  permissions: ["storage"],
+  optional_permissions: ["alarms", "notifications"].concat(m.optional_host_permissions),
+  background: { scripts: ["parse.js", "scan.js", "background.js"], persistent: false },
+  browser_action: { default_popup: m.action.default_popup, default_title: m.action.default_title, default_icon: m.action.default_icon },
   content_scripts: m.content_scripts,
 };
 require("fs").writeFileSync(process.argv[1] + "/manifest.json", JSON.stringify(ff, null, 2) + "\n");

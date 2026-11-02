@@ -276,3 +276,29 @@ test('productImageFromHTML finds the main picture in a product page', () => {
   assert.equal(APC.productImageFromHTML('<html><body>Robot check</body></html>'), null);
   assert.equal(APC.productImageFromHTML(''), null);
 });
+
+test('signals flag targets, streaks and returns to an earlier price', () => {
+  const now = 10;
+  assert.deepEqual(APC.signals({ points: [{ t: 1, p: 10 }] }, now), []);
+  assert.deepEqual(APC.signals({ target: 90, points: [{ t: 1, p: 100 }, { t: 2, p: 89 }] }, now).map((s) => s.key), ['targetHit']);
+  assert.deepEqual(APC.signals({ target: 80, points: [{ t: 1, p: 100 }, { t: 2, p: 89 }] }, now).map((s) => s.key), []);
+  const streak = APC.signals({ points: [{ t: 1, p: 100 }, { t: 2, p: 90 }, { t: 3, p: 80 }, { t: 4, p: 70 }] }, now);
+  assert.deepEqual(streak.map((s) => s.key), ['lowestSeen', 'streak']);
+  assert.equal(streak[1].n, 3);
+  assert.deepEqual(APC.signals({ points: [{ t: 1, p: 100 }, { t: 2, p: 120 }, { t: 3, p: 100 }] }, now).map((s) => s.key), ['lowestSeen', 'backToOld']);
+  assert.deepEqual(APC.signals({ points: [{ t: 1, p: 100 }, { t: 2, p: 100 }, { t: 3, p: 100 }] }, now).map((s) => s.key), []);
+});
+
+test('cartTotals sums current prices against the prices before the window', () => {
+  const day = 86400000;
+  const now = 100 * day;
+  const h = {
+    A: { points: [{ t: null, p: 100 }, { t: now - 10 * day, p: 90 }, { t: now - day, p: 80 }] },
+    B: { points: [{ t: now - 2 * day, p: 50 }] },
+    C: { points: [{ t: now - 20 * day, p: 10 }, { t: now - 3 * day, p: 15 }] },
+  };
+  const week = APC.cartTotals(h, ['A', 'B', 'C', 'missing'], now, now - 7 * day);
+  assert.deepEqual(week, { current: 145, before: 150, delta: -5, count: 3, compared: 2 });
+  const all = APC.cartTotals(h, ['A', 'C'], now, -Infinity);
+  assert.deepEqual([all.current, all.before, all.compared], [95, 95, 0]);
+});

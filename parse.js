@@ -360,9 +360,45 @@
     return null;
   }
 
+  function signals(entry, now) {
+    const out = [];
+    const pts = entry && Array.isArray(entry.points) ? entry.points : [];
+    if (pts.length < 2) return out;
+    const last = pts[pts.length - 1];
+    if (entry.target != null && last.p <= entry.target) out.push({ key: 'targetHit' });
+    if (lowestSeen(entry, last.p)) out.push({ key: 'lowestSeen' });
+    let streak = 0;
+    for (let i = pts.length - 1; i > 0 && pts[i].p < pts[i - 1].p; i--) streak++;
+    if (streak >= 3) out.push({ key: 'streak', n: streak });
+    if (pts.length >= 3 && pts[pts.length - 2].p !== last.p && pts.slice(0, -2).some((pt) => pt.p === last.p)) out.push({ key: 'backToOld' });
+    return out;
+  }
+
+  function cartTotals(history, keys, now, start) {
+    const tOf = (pt) => (pt.t == null ? -Infinity : pt.t);
+    let current = 0;
+    let before = 0;
+    let count = 0;
+    let compared = 0;
+    for (const key of keys || []) {
+      const entry = history && history[key];
+      const pts = entry && Array.isArray(entry.points) ? entry.points : [];
+      if (!pts.length) continue;
+      const last = pts[pts.length - 1];
+      current += last.p;
+      count++;
+      let first = pts.length;
+      while (first > 0 && tOf(pts[first - 1]) >= start) first--;
+      const earlier = first > 0 ? pts[first - 1] : null;
+      before += earlier ? earlier.p : last.p;
+      if (earlier) compared++;
+    }
+    return { current: round2(current), before: round2(before), delta: round2(current - before), count, compared };
+  }
+
   function lowestSeen(entry, price) {
     if (!entry || !Array.isArray(entry.points) || entry.points.length < 3) return false;
-    return entry.points.every((pt) => price <= pt.p);
+    return entry.points.every((pt) => price <= pt.p) && entry.points.some((pt) => pt.p > price);
   }
 
   function sparkline(values, width, height, pad) {
@@ -404,6 +440,8 @@
     itemsFromHistory,
     currencyForHost,
     lowestSeen,
+    signals,
+    cartTotals,
     productImageFromHTML,
     sparkline,
     newKeys,

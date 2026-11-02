@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.0 — 2026-11-02
+
+- Price alerts (opt-in): a background check of your cart on a schedule you
+  choose, a notification when an item drops by your chosen percentage or
+  reaches your target price, and a count of new drops on the toolbar icon.
+- Popup on the toolbar icon: alert settings, "check now", recent drops and
+  price targets.
+- Target price per item, set in a product's details; a chip on the card and an
+  alert when reached.
+- Deal signals: lowest seen, N drops in a row, back to an earlier price,
+  target reached.
+- Cart total in the first tile, with its change over the chosen period.
+- Storage moved from the page's local storage to extension storage (shared
+  with the background worker); existing history is migrated on first run. The
+  userscript build keeps using local storage and has no alerts.
+- Safari: Xcode project under safari/ generated with Apple's converter.
+
 ## 1.1.2 — 2026-11-02
 
 - A shimmering placeholder while a picture is being looked up; the frame icon

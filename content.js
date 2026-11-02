@@ -64,6 +64,14 @@
       diagDone: 'Diagnostics copied',
       isNew: 'New',
       lowest: 'Lowest seen',
+      target: 'Target price',
+      targetAt: (p) => 'Target ' + p,
+      targetHit: 'Target reached',
+      streak: (n) => n + ' drops in a row',
+      backToOld: 'Back to an earlier price',
+      cartTotal: 'Cart total',
+      save: 'Save',
+      clearTarget: 'Remove target',
       today: 'today',
       empty: 'Nothing matches',
       net: 'Net',
@@ -127,6 +135,14 @@
       diagDone: 'Teşhis kopyalandı',
       isNew: 'Yeni',
       lowest: 'En düşük',
+      target: 'Hedef fiyat',
+      targetAt: (p) => 'Hedef ' + p,
+      targetHit: 'Hedefe ulaştı',
+      streak: (n) => 'Üst üste ' + n + ' düşüş',
+      backToOld: 'Eski fiyata döndü',
+      cartTotal: 'Sepet toplamı',
+      save: 'Kaydet',
+      clearTarget: 'Hedefi kaldır',
       today: 'bugün',
       empty: 'Eşleşen ürün yok',
       net: 'Net',
@@ -150,7 +166,16 @@
   };
   const T = STRINGS[lang.slice(0, 2)] || STRINGS.en;
 
-  const store = {
+  const ext =
+    typeof browser !== 'undefined' && browser.storage && browser.storage.local
+      ? browser
+      : typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local
+        ? chrome
+        : null;
+  const HOST = location.hostname;
+  const STORAGE_KEYS = { [PREFS_KEY]: 'prefs', [SEEN_KEY]: 'seen:' + HOST, [HISTORY_KEY]: 'history:' + HOST };
+
+  const local = {
     get(key, fallback) {
       try {
         const v = JSON.parse(localStorage.getItem(key));
@@ -171,14 +196,75 @@
     },
   };
 
-  const prefs = Object.assign({ sort: 'pct', dir: 'asc', filter: 'all', window: 'all', view: 'cards', showOriginal: false, collapsed: false }, store.get(PREFS_KEY, {}));
-  if (prefs.view !== 'cards' && prefs.view !== 'list') prefs.view = 'cards';
-  if (!SORT_KEYS.includes(prefs.sort)) prefs.sort = 'pct';
-  if (!WINDOWS.includes(prefs.window)) prefs.window = 'all';
-  if (prefs.dir !== 'asc' && prefs.dir !== 'desc') prefs.dir = APC.defaultSortDir(prefs.sort);
+  const pendingWrites = new Map();
+  let writeTimer = null;
+  function flushWrites() {
+    writeTimer = null;
+    if (!pendingWrites.size) return;
+    const batch = {};
+    for (const [k, v] of pendingWrites) batch[k] = v;
+    pendingWrites.clear();
+    try {
+      const r = ext.storage.local.set(batch);
+      if (r && r.catch) r.catch(() => {});
+    } catch (e) {}
+  }
+
+  const store = {
+    set(key, value) {
+      if (!ext) return local.set(key, value);
+      pendingWrites.set(STORAGE_KEYS[key], value);
+      clearTimeout(writeTimer);
+      writeTimer = setTimeout(flushWrites, 150);
+    },
+    remove(key) {
+      if (!ext) return local.remove(key);
+      pendingWrites.delete(STORAGE_KEYS[key]);
+      try {
+        const r = ext.storage.local.remove(STORAGE_KEYS[key]);
+        if (r && r.catch) r.catch(() => {});
+      } catch (e) {}
+    },
+  };
+
+  async function loadState() {
+    if (!ext) return { prefs: local.get(PREFS_KEY, {}), seen: local.get(SEEN_KEY, null), history: local.get(HISTORY_KEY, {}) };
+    let got = {};
+    try {
+      got = (await ext.storage.local.get(Object.values(STORAGE_KEYS))) || {};
+    } catch (e) {
+      got = {};
+    }
+    const out = { prefs: got.prefs || local.get(PREFS_KEY, {}), seen: got[STORAGE_KEYS[SEEN_KEY]] || local.get(SEEN_KEY, null), history: got[STORAGE_KEYS[HISTORY_KEY]] };
+    if (!out.history) {
+      out.history = local.get(HISTORY_KEY, {});
+      if (Object.keys(out.history).length) store.set(HISTORY_KEY, out.history);
+    }
+    return out;
+  }
+
+  function notifyWorker(message) {
+    if (!ext || !ext.runtime || !ext.runtime.sendMessage) return;
+    try {
+      const r = ext.runtime.sendMessage(message);
+      if (r && r.catch) r.catch(() => {});
+    } catch (e) {}
+  }
+
+  let prefs = { sort: 'pct', dir: 'asc', filter: 'all', window: 'all', view: 'cards', showOriginal: false, collapsed: false };
   const savePrefs = () => store.set(PREFS_KEY, prefs);
-  const prevSeen = store.get(SEEN_KEY, null);
-  let history = APC.pruneHistory(store.get(HISTORY_KEY, {}), Date.now(), 365);
+  let prevSeen = null;
+  let history = {};
+
+  function adoptState(loaded) {
+    prefs = Object.assign(prefs, loaded.prefs || {});
+    if (prefs.view !== 'cards' && prefs.view !== 'list') prefs.view = 'cards';
+    if (!SORT_KEYS.includes(prefs.sort)) prefs.sort = 'pct';
+    if (!WINDOWS.includes(prefs.window)) prefs.window = 'all';
+    if (prefs.dir !== 'asc' && prefs.dir !== 'desc') prefs.dir = APC.defaultSortDir(prefs.sort);
+    prevSeen = loaded.seen;
+    history = APC.pruneHistory(loaded.history || {}, Date.now(), 365);
+  }
 
   const state = {
     items: [],
@@ -193,6 +279,8 @@
     query: '',
     showTags: false,
     tracked: 0,
+    cartKeys: [],
+    windowStart: -Infinity,
     ui: {},
   };
 
@@ -625,11 +713,19 @@
     return T['win' + prefs.window.charAt(0).toUpperCase() + prefs.window.slice(1)] || prefs.window;
   }
 
+  function cartLine(ref) {
+    if (!state.cartKeys.length) return null;
+    const ct = APC.cartTotals(history, state.cartKeys, Date.now(), state.windowStart);
+    if (!ct.count) return null;
+    const delta = ct.compared && ct.delta !== 0 ? ' · ' + money(ct.delta, ref, true) : '';
+    return el('div', { class: 'apc-stat-sub apc-stat-cart', title: T.items(ct.count) }, T.cartTotal + ' ' + money(ct.current, ref) + delta);
+  }
+
   function tiles(s, ref) {
     return el(
       'div',
       { class: 'apc-kpis' },
-      statTile('all', periodLabel(), T.items(s.total), T.net + ' ' + money(s.net, ref, true), spreadBar(s)),
+      statTile('all', periodLabel(), T.items(s.total), T.net + ' ' + money(s.net, ref, true), [cartLine(ref), spreadBar(s)]),
       statTile('down', T.dropped, T.items(s.downCount), s.downCount ? money(s.downSum, ref, true) + ' ' + T.combined : T.none),
       statTile('up', T.increased, T.items(s.upCount), s.upCount ? money(s.upSum, ref, true) + ' ' + T.combined : T.none),
       highlight(T.biggestDrop, s.biggestDown, 'down'),
@@ -713,6 +809,74 @@
     run();
   }
 
+  function signalText(sig) {
+    if (sig.key === 'targetHit') return T.targetHit;
+    if (sig.key === 'lowestSeen') return T.lowest;
+    if (sig.key === 'streak') return T.streak(sig.n);
+    if (sig.key === 'backToOld') return T.backToOld;
+    return '';
+  }
+
+  function signalChips(item, extraClass) {
+    const chips = [];
+    for (const sig of (item.signals || []).slice(0, 2)) chips.push(chip(signalText(sig), (sig.key === 'targetHit' ? 'target' : 'lowest') + (extraClass ? ' ' + extraClass : '')));
+    const entry = item.hist;
+    if (entry && entry.target != null && !(item.signals || []).some((sig) => sig.key === 'targetHit')) {
+      chips.push(chip(T.targetAt(money(entry.target, item)), 'group' + (extraClass ? ' ' + extraClass : '')));
+    }
+    return chips;
+  }
+
+  function targetEditor(item) {
+    const entry = item.hist;
+    if (!entry) return null;
+    const input = el('input', {
+      type: 'text',
+      class: 'apc-target-input',
+      inputmode: 'decimal',
+      placeholder: money(item.newPrice, item),
+      value: entry.target != null ? APC.formatMoney(entry.target, '', 'suffix', locale).trim() : '',
+      'aria-label': T.target,
+    });
+    const save = () => {
+      const v = APC.parseAmount(input.value);
+      if (v == null || v <= 0) delete entry.target;
+      else entry.target = v;
+      store.set(HISTORY_KEY, history);
+      item.signals = APC.signals(entry, Date.now());
+      refreshRows();
+    };
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        save();
+      }
+    });
+    return el(
+      'div',
+      { class: 'apc-target' },
+      el('span', { class: 'apc-detail-label' }, T.target),
+      input,
+      el('button', { type: 'button', class: 'apc-btn apc-btn-small', onclick: save }, T.save),
+      entry.target != null
+        ? el(
+            'button',
+            {
+              type: 'button',
+              class: 'apc-linkbtn',
+              onclick: () => {
+                delete entry.target;
+                store.set(HISTORY_KEY, history);
+                item.signals = APC.signals(entry, Date.now());
+                refreshRows();
+              },
+            },
+            T.clearTarget
+          )
+        : null
+    );
+  }
+
   function detailsRow(item) {
     const entry = item.hist;
     const dir = item.direction;
@@ -731,7 +895,8 @@
           'div',
           { class: 'apc-detail-history' },
           el('div', { class: 'apc-detail-label' }, T.history, el('span', { class: 'apc-detail-count' }, T.seen(entry.points.length))),
-          el('div', { class: 'apc-detail-history-row' }, sparklineSVG(entry, dir), pointsList(entry, item))
+          el('div', { class: 'apc-detail-history-row' }, sparklineSVG(entry, dir), pointsList(entry, item)),
+          targetEditor(item)
         )
       : null;
     const actions = el(
@@ -761,8 +926,8 @@
     const pctText = APC.formatPct(item.pct, locale, true);
     const href = productHref(item);
     const chips = [];
-    if (item.lowest) chips.push(chip(T.lowest, 'lowest'));
-    if (state.showTags && item.group) chips.push(chip(T[item.group], 'group'));
+    chips.push(...signalChips(item));
+    if (state.showTags && item.group && item.group !== state.majorityGroup) chips.push(chip(T[item.group], 'group'));
     const nameNode = href
       ? el('a', { href, title: item.name }, item.name)
       : el('span', { class: 'apc-name-text', title: item.name }, item.name);
@@ -849,6 +1014,7 @@
       'div',
       { class: 'apc-card-details' },
       entry ? pointsList(entry, item) : null,
+      targetEditor(item),
       item.live ? null : el('button', { type: 'button', class: 'apc-linkbtn apc-forget', onclick: () => forgetItem(item.key) }, T.forget)
     );
   }
@@ -864,7 +1030,7 @@
       { class: 'apc-card-media', href: href || null, title: item.name },
       thumb(item, 'apc-card-img'),
       item.isNew ? el('i', { class: 'apc-newdot apc-card-new', title: T.isNew }) : null,
-      item.lowest ? chip(T.lowest, 'lowest apc-card-ribbon') : null
+      signalChips(item, 'apc-card-ribbon').slice(0, 1)
     );
     const title = el(href ? 'a' : 'span', { class: 'apc-card-title', href: href || null, title: item.name }, item.name);
     const prices = el(
@@ -1057,8 +1223,11 @@
   function render(items, s) {
     const ui = state.ui;
     const ref = items[0] || pageMoney;
-    const groups = new Set(items.map((i) => i.group).filter(Boolean));
-    state.showTags = groups.size > 1;
+    const groupCounts = {};
+    for (const i of items) if (i.group) groupCounts[i.group] = (groupCounts[i.group] || 0) + 1;
+    const majority = Object.keys(groupCounts).sort((a, b) => groupCounts[b] - groupCounts[a])[0] || '';
+    state.showTags = Object.keys(groupCounts).length > 1;
+    state.majorityGroup = majority;
     const newCount = items.filter((i) => i.isNew).length;
 
     ui.collapseBtn = el('button', { type: 'button', class: 'apc-chevron apc-collapse', onclick: () => setCollapsed(!prefs.collapsed) }, '›');
@@ -1276,6 +1445,7 @@
     const onCart = CART_RE.test(location.pathname);
     const { live, observed, now, dirty } = scan();
     state.tracked = observed.length;
+    state.cartKeys = observed.filter((o) => o.group === 'cart').map((o) => o.key);
     if (!live.length && !onCart) {
       if (state.signature) teardown();
       return;
@@ -1286,6 +1456,7 @@
   function build(live, now, dirty) {
     const liveByKey = new Map(live.map((i) => [i.key, i]));
     const start = APC.windowStart(prefs.window, now);
+    state.windowStart = start;
     const items = APC.itemsFromHistory(history, now, start, pageMoney).map((base) => {
       const l = liveByKey.get(base.key);
       const entry = history[base.key];
@@ -1303,12 +1474,12 @@
         nodes: l ? l.nodes : [],
         image,
         hist: entry,
-        lowest: APC.lowestSeen(entry, base.newPrice),
+        signals: APC.signals(entry, now),
         isNew: !!(prevSeen && prevSeen.t && base.changedAt > prevSeen.t),
       });
     });
     if (dirty) store.set(HISTORY_KEY, history);
-    const signature = [prefs.window, state.tracked]
+    const signature = [prefs.window, state.tracked, state.cartKeys.join(',')]
       .concat(items.map((i) => [i.key, i.oldPrice, i.newPrice, i.changedAt, i.image || '', i.live ? 1 : 0].join('|')))
       .join('\n');
     if (fresh(document.getElementById(PANEL_ID), items, signature)) return;
@@ -1343,6 +1514,11 @@
       return;
     }
   });
-  observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'srcset', 'data-src', 'data-a-dynamic-image'] });
-  run();
+  async function init() {
+    adoptState(await loadState());
+    observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'srcset', 'data-src', 'data-a-dynamic-image'] });
+    run();
+    if (CART_RE.test(location.pathname)) notifyWorker({ type: 'visited', host: HOST });
+  }
+  init();
 })();

@@ -29,6 +29,10 @@ PRODUCTS = [
     ("B0BOSEFLEX", "Bose SoundLink Flex Bluetooth Speaker, Black", "🔊", "#e8e8e8", None, 119.00, None, True),
     ("B0YETIRAMB", "YETI Rambler 20 oz Tumbler with MagSlider Lid, Navy", "🧋", "#e2e7f1", None, 38.00, None, True),
 ]
+CART = [
+    ("B0AIRFRYER", "Ninja Air Fryer Pro 4-in-1, 5 Qt, Grey", "🍟", "#ece9e4", 119.99),
+    ("B0STANDESK", "FlexiSpot Electric Standing Desk, 48 x 24 in, Walnut", "🪑", "#efe7df", 249.99),
+]
 LAZY_DATA_SRC = {"B0LOGIMX3S"}
 LAZY_DYNAMIC = {"B0SONICARE"}
 GIF = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
@@ -58,7 +62,7 @@ def alert_line(asin, name, old, new):
     )
 
 
-def card(asin, name, emoji, tint, price, has_image):
+def card(asin, name, emoji, tint, price, has_image, kind="saved"):
     img = ""
     if has_image:
         real = picture(emoji, tint)
@@ -69,7 +73,7 @@ def card(asin, name, emoji, tint, price, has_image):
         else:
             img = f'<img class="sc-product-image" src="{real}" alt="">'
     return (
-        f'    <div class="sc-list-item" data-asin="{asin}" data-itemtype="saved">'
+        f'    <div class="sc-list-item" data-asin="{asin}" data-itemtype="{kind}">'
         f'<a class="sc-product-link" href="/dp/{asin}">{img}</a>'
         f'<span class="sc-product-title">{name}</span>'
         f'<span class="sc-product-price a-text-bold">{usd(price)}</span>'
@@ -126,6 +130,8 @@ html = f'''<!doctype html>
     B0LEGOORCH: Object.assign({{ name: 'LEGO Icons Orchid Artificial Plant Building Set 10311', href: '/dp/B0LEGOORCH', seen: now - 6 * day, points: [{{ t: null, p: 54.99 }}, {{ t: now - 6 * day, p: 49.99 }}] }}, usd),
     B0BOSEFLEX: Object.assign({{ name: 'Bose SoundLink Flex Bluetooth Speaker, Black', href: '/dp/B0BOSEFLEX', seen: now - 12 * day, points: [{{ t: null, p: 149.00 }}, {{ t: now - 12 * day, p: 119.00 }}] }}, usd),
     B0YETIRAMB: Object.assign({{ name: 'YETI Rambler 20 oz Tumbler with MagSlider Lid, Navy', href: '/dp/B0YETIRAMB', seen: now - 26 * day, points: [{{ t: null, p: 35.00 }}, {{ t: now - 26 * day, p: 38.00 }}] }}, usd),
+    B0AIRFRYER: Object.assign({{ name: 'Ninja Air Fryer Pro 4-in-1, 5 Qt, Grey', href: '/dp/B0AIRFRYER', group: 'cart', seen: now - 3 * day, points: [{{ t: now - 20 * day, p: 139.99 }}, {{ t: now - 3 * day, p: 129.99 }}] }}, usd),
+    B0STANDESK: Object.assign({{ name: 'FlexiSpot Electric Standing Desk, 48 x 24 in, Walnut', href: '/dp/B0STANDESK', group: 'cart', seen: now - 3 * day, points: [{{ t: now - 20 * day, p: 269.99 }}, {{ t: now - 3 * day, p: 249.99 }}] }}, usd),
     B0GHOSTITM: Object.assign({{ name: 'Apple Magic Keyboard with Touch ID (no longer in the list)', href: '/dp/B0GHOSTITM', seen: now - 9 * day, points: [{{ t: null, p: 179.00 }}, {{ t: now - 9 * day, p: 149.00 }}] }}, usd),
   }}));
   localStorage.setItem('apc:prefs', JSON.stringify({{ sort: 'pct', dir: 'asc', filter: q.get('filter') || 'all', window: q.get('win') || 'all', view: q.get('view') || 'cards', showOriginal: false, collapsed: false }}));
@@ -167,6 +173,13 @@ html = f'''<!doctype html>
   </div>
 </div>
 
+<div id="sc-active-cart" class="sc-list">
+  <h2>Cart ({len(CART)} items)</h2>
+  <div class="sc-grid">
+{chr(10).join(card(a, n, e, t, pr, True, "active") for a, n, e, t, pr in CART)}
+  </div>
+</div>
+
 <div id="sc-saved-cart" class="sc-list">
   <h2>Saved for later ({len(PRODUCTS)} items)</h2>
   <div class="sc-grid">
@@ -187,8 +200,12 @@ html = f'''<!doctype html>
   const q = new URLSearchParams(location.search);
   const key = q.get('expand');
   if (!key) return;
-  const btn = document.querySelector('#apc-panel .apc-row[data-key="' + key + '"] .apc-chevron, #apc-panel .apc-card[data-key="' + key + '"] .apc-card-more');
-  if (btn) btn.click();
+  let tries = 0;
+  (function attempt() {{
+    const btn = document.querySelector('#apc-panel .apc-row[data-key="' + key + '"] .apc-chevron, #apc-panel .apc-card[data-key="' + key + '"] .apc-card-more');
+    if (btn) btn.click();
+    else if (tries++ < 40) setTimeout(attempt, 50);
+  }})();
 }})();
 </script>
 </body>
