@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Cart Price Changes for Amazon",
   "short_name": "Cart Price Changes",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Your Amazon cart and saved-for-later price changes as cards or a table: old vs new, change, history, period filters.",
   "author": "Coursion Studio",
   "homepage_url": "https://github.com/Coursion-Studio/amazon-cart-price-changes",

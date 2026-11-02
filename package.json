@@ -1,6 +1,6 @@
 {
   "name": "amazon-cart-price-changes",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Browser extension: Amazon cart and saved-for-later price changes as cards or a table, with history",
   "scripts": {

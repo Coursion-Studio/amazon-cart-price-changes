@@ -82,15 +82,15 @@
       "kind": "group",
       "name": "Products",
       "children": [
-        { "path": "<PRODUCTS>/Cart Price Changes for Amazon.app", "id": "4DD1FD123098E35A00FF97CA", "type": "wrapper.application", "index": false },
-        { "path": "<PRODUCTS>/Cart Price Changes for Amazon Extension.appex", "id": "4DD1FD2D3098E35B00FF97CA", "type": "wrapper.app-extension", "index": false, "target-membership": [ { "build-phase": "Cart Price Changes for Amazon/copy/Embed Foundation Extensions", "header-preservation": "remove-on-copy" } ] },
+        { "path": "<PRODUCTS>/Cart Price Changes for Amazon.app", "id": "4DC14A963098E5BA007AF140", "type": "wrapper.application", "index": false },
+        { "path": "<PRODUCTS>/Cart Price Changes for Amazon Extension.appex", "id": "4DC14AB13098E5BC007AF140", "type": "wrapper.app-extension", "index": false, "target-membership": [ { "build-phase": "Cart Price Changes for Amazon/copy/Embed Foundation Extensions", "header-preservation": "remove-on-copy" } ] },
       ],
     },
   ],
   "targets": [
     {
       "name": "Cart Price Changes for Amazon",
-      "id": "4DD1FD113098E35A00FF97CA",
+      "id": "4DC14A953098E5BA007AF140",
       "product": "Products/Cart Price Changes for Amazon.app",
       "product-type": "application",
       "dependencies": [
@@ -146,7 +146,7 @@
       },
     }, {
       "name": "Cart Price Changes for Amazon Extension",
-      "id": "4DD1FD2C3098E35B00FF97CA",
+      "id": "4DC14AB03098E5BC007AF140",
       "product": "Products/Cart Price Changes for Amazon Extension.appex",
       "product-type": "app-extension",
       "build-phases": [

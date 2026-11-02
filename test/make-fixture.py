@@ -213,3 +213,68 @@ html = f'''<!doctype html>
 '''
 OUT.write_text(html)
 print(OUT.relative_to(ROOT.parent), len(PRODUCTS), "products,", len(drops), "drops,", len(rises), "rises")
+
+DP = ROOT / "dp"
+DP.mkdir(exist_ok=True)
+sony = PRODUCTS[0]
+product = f'''<!doctype html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<title>{sony[1]} : Amazon.com (fixture)</title>
+<style>
+  body {{ margin: 0; font: 13px/1.4 "Amazon Ember", Arial, sans-serif; color: #0f1111; background: #fff; }}
+  .nav {{ background: #131921; color: #fff; height: 60px; display: flex; align-items: center; padding: 0 20px; gap: 24px; font-size: 14px; }}
+  .nav b {{ font-size: 20px; letter-spacing: -0.02em; }}
+  .nav .search {{ flex: 1; height: 38px; border-radius: 4px; background: #fff; }}
+  .page {{ max-width: 1300px; margin: 18px auto; padding: 0 18px; display: grid; grid-template-columns: 420px 1fr 260px; gap: 28px; }}
+  #landingImage {{ width: 400px; height: 400px; border-radius: 12px; }}
+  #productTitle {{ font-size: 24px; font-weight: 400; margin: 0 0 6px; line-height: 1.3; }}
+  .a-price .a-offscreen {{ position: absolute; left: -9999px; }}
+  .price {{ font-size: 28px; font-weight: 500; }}
+  .deal {{ color: #cc0c39; font-weight: 700; margin-right: 8px; }}
+  .was {{ color: #565959; font-size: 13px; }}
+  .buy {{ border: 1px solid #d5d9d9; border-radius: 8px; padding: 16px; }}
+  .btn {{ display: block; width: 100%; padding: 8px; border-radius: 999px; border: 0; margin: 8px 0; font-size: 13px; }}
+  .y {{ background: #ffd814; }} .o {{ background: #ffa41c; }}
+  html.shot .page {{ margin: 10px auto; }}
+</style>
+<script>
+(function () {{
+  const q = new URLSearchParams(location.search);
+  if (!q.has('seed')) return;
+  const day = 86400000;
+  const now = Date.now();
+  localStorage.clear();
+  const usd = {{ currency: '$', placement: 'prefix', group: 'saved' }};
+  const history = {{}};
+  if (!q.has('untracked')) history.{sony[0]} = Object.assign({{ name: {sony[1]!r}, href: '/dp/{sony[0]}', seen: now - 2 * day, target: q.has('target') ? 249 : undefined, points: [{{ t: null, p: 349.99 }}, {{ t: now - 9 * day, p: 299.00 }}, {{ t: now - 2 * day, p: 278.00 }}] }}, usd);
+  localStorage.setItem('apc:history', JSON.stringify(history));
+}})();
+</script>
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+<script>if (new URLSearchParams(location.search).has('shot')) document.documentElement.classList.add('shot');</script>
+<div class="nav"><b>amazon.com</b><span>Deliver to Seattle 98101</span><div class="search"></div><span>Hello, sign in<br>Account &amp; Lists</span><span>Cart</span></div>
+<div class="page">
+  <div><img id="landingImage" src="{picture(sony[2], sony[3])}" alt="{sony[1]}"></div>
+  <div>
+    <h1 id="productTitle">{sony[1]}</h1>
+    <div style="color:#007185;margin-bottom:10px">Visit the Sony Store · 4.6 ★ (12,408)</div>
+    <div id="corePriceDisplay_desktop_feature_div">
+      <div class="price"><span class="deal">-23%</span><span class="a-price"><span class="a-offscreen">$269.00</span><span aria-hidden="true">$269.00</span></span></div>
+      <div class="was">List Price: <span class="a-price a-text-price"><span class="a-offscreen">$349.99</span><span aria-hidden="true">$349.99</span></span></div>
+    </div>
+    <p style="margin-top:14px"><b>About this item</b></p>
+    <ul><li>Industry-leading noise cancellation with two processors and eight microphones.</li><li>Up to 30 hours of battery life with quick charging.</li><li>Crystal-clear hands-free calling.</li></ul>
+  </div>
+  <div class="buy"><div class="price">$269.00</div><div style="color:#007600;margin:6px 0">In Stock</div><button class="btn y">Add to Cart</button><button class="btn o">Buy Now</button></div>
+</div>
+<script src="../../parse.js"></script>
+<script src="../../content.js"></script>
+</body>
+</html>
+'''
+(DP / f"{sony[0]}.html").write_text(product)
+print("test/dp/%s.html" % sony[0])

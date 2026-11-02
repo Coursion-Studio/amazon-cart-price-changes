@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1 — 2026-11-02
+
+- A bar under the price on every product page: **Track price** for items
+  that are not in your cart or saved list, and, once tracked, the price
+  history, signals, the target-price editor and **Stop tracking**.
+- Fix: the cart panel failed to render in 1.2.0 because of a string-table
+  collision.
+
 ## 1.2.0 — 2026-11-02
 
 - Price alerts (opt-in): a background check of your cart on a schedule you

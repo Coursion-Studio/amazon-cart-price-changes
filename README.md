@@ -43,7 +43,8 @@ watches your cart for you between visits.
 | **Period** | Today, 2 days, 7 days, 30 days or all time. Each row shows the change over that period, however many steps lie between, and the summary follows. |
 | **History** | On every visit the extension reads the current price of every item in your cart and saved-for-later list and records a point when a price moved. Amazon's own notices are folded in. Click any product for its full history. |
 | **Alerts** | Opt in from the toolbar popup. The extension then checks your cart on a schedule you choose, with no Amazon tab open, and notifies you when an item drops by your chosen percentage or reaches its target price. The icon shows the number of new drops. |
-| **Targets** | A target price per product, set in its details. It shows as a chip and fires an alert when reached. |
+| **Targets** | A target price per product, set on the product page or in its details on the cart page. It shows as a chip and fires an alert when reached. |
+| **Any product page** | A small bar under the price: **Track price** adds the item to the record even if it is not in your cart; once tracked it shows the history, signals and the target editor. |
 | **Signals** | A blue dot on everything that changed since your last visit, plus *Lowest seen*, *N drops in a row*, *Back to an earlier price* and *Target reached*. |
 | **Also** | Search, sort menu, collapse, CSV export, a diagnostics copy for bug reports, English and Turkish interface following the page language. |
 
@@ -102,12 +103,23 @@ target price. Each drop is announced once. The icon shows the number of new
 drops since you last opened the cart or the popup; the popup lists the recent
 drops and your targets.
 
-## Target prices
+## Target prices and tracking from product pages
 
-Open a product's details (the chevron on a card or a row) and type a price
-next to **Target price**. The target shows as a chip on the card, turns into
-*Target reached* when the price is at or below it, and, with alerts on, fires
-a notification the moment a check sees it. **Remove target** clears it.
+<p align="center">
+  <img src="docs/product.png" width="900" alt="The bar under a product's price: tracking state, sparkline, signals and the target-price editor">
+</p>
+
+On any product page a bar appears under the price. **Track price** adds the
+item to the record with its current price; from then on every visit to the
+page, the cart, or a background check records it. Once tracked, the bar shows
+the sparkline, how many prices were seen, the lowest, the signals and the
+target editor.
+
+To set a target, type a price next to **Target price** and press Save, either
+there or in the product's details on the cart page (the chevron on a card or a
+row). The target shows as a chip, turns into *Target reached* when the price
+is at or below it, and, with alerts on, fires a notification the moment a
+check sees it. **Remove target** clears it; **Stop tracking** forgets the item.
 
 ## Signals
 
@@ -190,6 +202,10 @@ because it lives under a `cart/` path. Releases are listed in
 [CHANGELOG.md](CHANGELOG.md).
 
 ## Questions
+
+**How do I set a target price?** On the product's page, in the bar under the
+price; or on the cart page, open the product's details and use the target
+field.
 
 **Only a few items show up.** The record starts when you install. Amazon's own
 box only lists what changed since you last looked; from now on every visit

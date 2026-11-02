@@ -13,6 +13,8 @@
   const SORT_KEYS = ['name', 'oldPrice', 'newPrice', 'delta', 'pct', 'changedAt'];
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const CART_RE = /(^|\/)(cart|gp\/cart|gp\/aw\/c)(\/|$)/;
+  const PRODUCT_RE = /\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})(?![A-Z0-9])/i;
+  const PRODUCT_ID = 'apc-product';
   const WINDOWS = ['today', '2d', '7d', '30d', 'all'];
   const LIST_SCOPE = '#sc-active-cart, #sc-saved-cart, #activeCartViewForm, #sc-saved-cart-items, [data-name="Active Items"], [data-name="Saved Items"], .sc-list-body';
 
@@ -72,6 +74,11 @@
       cartTotal: 'Cart total',
       save: 'Save',
       clearTarget: 'Remove target',
+      track: 'Track price',
+      trackingLabel: 'Tracking',
+      untrack: 'Stop tracking',
+      lowestWord: 'lowest',
+      trackHint: 'Tracked items appear in the price panel on your cart page and can alert you.',
       today: 'today',
       empty: 'Nothing matches',
       net: 'Net',
@@ -143,6 +150,11 @@
       cartTotal: 'Sepet toplamı',
       save: 'Kaydet',
       clearTarget: 'Hedefi kaldır',
+      track: 'Fiyatı takip et',
+      trackingLabel: 'Takipte',
+      untrack: 'Takibi bırak',
+      lowestWord: 'en düşük',
+      trackHint: 'Takip edilen ürünler sepet sayfanızdaki fiyat panelinde görünür ve uyarı verebilir.',
       today: 'bugün',
       empty: 'Eşleşen ürün yok',
       net: 'Net',
@@ -279,6 +291,7 @@
     query: '',
     showTags: false,
     tracked: 0,
+    productSignature: '',
     cartKeys: [],
     windowStart: -Infinity,
     ui: {},
@@ -562,6 +575,123 @@
     return out;
   }
 
+  function productPageInfo() {
+    const m = PRODUCT_RE.exec(location.pathname);
+    if (!m) return null;
+    const asin = m[1].toUpperCase();
+    const titleNode = document.querySelector('#productTitle, #title');
+    const name = squash(titleNode ? titleNode.textContent : '') || squash(document.title.replace(/\s*[:|-]\s*Amazon.*$/i, ''));
+    const priceNode = document.querySelector(
+      '#corePriceDisplay_desktop_feature_div .a-price:not(.a-text-price) .a-offscreen, #corePrice_feature_div .a-price:not(.a-text-price) .a-offscreen, #apex_desktop .a-price:not(.a-text-price) .a-offscreen, #priceblock_dealprice, #priceblock_ourprice, #price_inside_buybox, #tp_price_block_total_price_ww .a-offscreen, #corePrice_desktop .a-price:not(.a-text-price) .a-offscreen, .a-price:not(.a-text-price) .a-offscreen'
+    );
+    const found = priceNode ? APC.findPrices(priceNode.textContent) : [];
+    const img = document.querySelector('#landingImage, #imgBlkFront, #main-image, #ebooksImgBlkFront');
+    return {
+      asin,
+      key: asin,
+      name: name || asin,
+      price: found.length ? found[0].amount : null,
+      currency: found.length ? found[0].currency : pageMoney.currency,
+      placement: found.length ? found[0].placement : pageMoney.placement,
+      image: imageSource(img),
+      href: location.origin + '/dp/' + asin,
+      group: '',
+    };
+  }
+
+  function productAnchor() {
+    const sel = ['#corePriceDisplay_desktop_feature_div', '#corePrice_feature_div', '#apex_desktop', '#corePrice_desktop', '#price', '#priceblock_ourprice', '#unifiedPrice_feature_div'];
+    for (const q of sel) {
+      const node = document.querySelector(q);
+      if (node) return node;
+    }
+    const title = document.querySelector('#titleSection, #title_feature_div, #productTitle');
+    return title || null;
+  }
+
+  function renderProductWidget(info) {
+    const now = Date.now();
+    const entry = history[info.key] || null;
+    const item = { key: info.key, hist: entry, newPrice: info.price != null ? info.price : entry && entry.points.length ? entry.points[entry.points.length - 1].p : 0, currency: info.currency, placement: info.placement };
+    if (entry) {
+      if (!entry.currency && info.currency) {
+        entry.currency = info.currency;
+        entry.placement = info.placement;
+      }
+      item.currency = entry.currency || info.currency;
+      item.placement = entry.placement || info.placement;
+      item.signals = APC.signals(entry, now);
+    }
+    const rerender = () => {
+      state.productSignature = '';
+      productPage();
+    };
+    const track = () => {
+      if (info.price == null) return;
+      APC.recordObservation(history, info, now);
+      store.set(HISTORY_KEY, history);
+      rerender();
+    };
+    const untrack = () => {
+      delete history[info.key];
+      store.set(HISTORY_KEY, history);
+      rerender();
+    };
+    const head = el('div', { class: 'apc-pp-head' }, el('span', { class: 'apc-pp-mark', 'aria-hidden': 'true' }), el('span', { class: 'apc-pp-title' }, T.title));
+    let body;
+    if (!entry) {
+      body = el(
+        'div',
+        { class: 'apc-pp-body' },
+        el('button', { type: 'button', class: 'apc-btn apc-btn-small apc-pp-track', disabled: info.price == null ? true : null, onclick: track }, T.track),
+        el('span', { class: 'apc-pp-hint' }, T.trackHint)
+      );
+    } else {
+      const pts = entry.points;
+      const low = Math.min(...pts.map((p) => p.p));
+      const stats = el(
+        'span',
+        { class: 'apc-pp-stats' },
+        el('b', null, T.trackingLabel),
+        ' · ' + T.seen(pts.length) + ' · ' + T.lowestWord + ' ' + money(low, item)
+      );
+      const chips = signalChips(item);
+      body = el(
+        'div',
+        { class: 'apc-pp-body' },
+        pts.length >= 2 ? sparklineSVG(entry, pts[pts.length - 1].p < pts[0].p ? 'down' : pts[pts.length - 1].p > pts[0].p ? 'up' : 'same', 96, 24) : null,
+        stats,
+        chips.length ? el('span', { class: 'apc-pp-chips' }, chips) : null,
+        targetEditor(item, rerender),
+        el('button', { type: 'button', class: 'apc-linkbtn apc-forget', onclick: untrack }, T.untrack)
+      );
+    }
+    return el('section', { id: PRODUCT_ID, class: 'apc-pp' + (entry ? ' tracked' : ''), lang: locale }, head, body);
+  }
+
+  function productPage() {
+    const info = productPageInfo();
+    if (!info) return false;
+    const entry = history[info.key];
+    if (entry && info.price != null) {
+      const last = entry.points[entry.points.length - 1];
+      if (!last || last.p !== info.price || !entry.image) {
+        APC.recordObservation(history, info, Date.now());
+        store.set(HISTORY_KEY, history);
+      }
+    }
+    const current = history[info.key];
+    const signature = [info.key, info.price, current ? current.points.length : 0, current ? current.target : '', current ? 1 : 0].join('|');
+    const existing = document.getElementById(PRODUCT_ID);
+    if (existing && existing.isConnected && signature === state.productSignature) return true;
+    if (existing) existing.remove();
+    const anchor = productAnchor();
+    if (!anchor) return true;
+    state.productSignature = signature;
+    anchor.insertAdjacentElement('afterend', renderProductWidget(info));
+    return true;
+  }
+
   function anchorFor(live) {
     const parsed = new Set(live.flatMap((i) => i.nodes));
     const ownText = live.reduce((n, i) => n + i.nodes.reduce((m, li) => m + li.textContent.length, 0), 0);
@@ -827,9 +957,10 @@
     return chips;
   }
 
-  function targetEditor(item) {
+  function targetEditor(item, onChange) {
     const entry = item.hist;
     if (!entry) return null;
+    const changed = onChange || refreshRows;
     const input = el('input', {
       type: 'text',
       class: 'apc-target-input',
@@ -844,7 +975,7 @@
       else entry.target = v;
       store.set(HISTORY_KEY, history);
       item.signals = APC.signals(entry, Date.now());
-      refreshRows();
+      changed();
     };
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -868,7 +999,7 @@
                 delete entry.target;
                 store.set(HISTORY_KEY, history);
                 item.signals = APC.signals(entry, Date.now());
-                refreshRows();
+                changed();
               },
             },
             T.clearTarget
@@ -1443,6 +1574,10 @@
 
   function run() {
     const onCart = CART_RE.test(location.pathname);
+    if (!onCart && PRODUCT_RE.test(location.pathname)) {
+      productPage();
+      return;
+    }
     const { live, observed, now, dirty } = scan();
     state.tracked = observed.length;
     state.cartKeys = observed.filter((o) => o.group === 'cart').map((o) => o.key);
@@ -1509,7 +1644,7 @@
   const observer = new MutationObserver((mutations) => {
     for (const m of mutations) {
       const t = m.target;
-      if (t && t.nodeType === 1 && t.closest('#' + PANEL_ID)) continue;
+      if (t && t.nodeType === 1 && t.closest('#' + PANEL_ID + ', #' + PRODUCT_ID)) continue;
       schedule();
       return;
     }
