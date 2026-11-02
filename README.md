@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/cards.png" width="900" alt="The card view: each product with its picture, new price, old price, change pill, sparkline and date">
+  <img src="docs/hero.png" width="1000" alt="Cart Price Changes for Amazon: the panel on a cart page, with product cards showing price drops">
 </p>
 
 ## The problem
@@ -42,6 +42,10 @@ record so the picture is always there and grows over time.
 | **History** | On every visit the extension reads the current price of every item in your cart and saved-for-later list and records a point when a price moved. Amazon's own notices are folded in. Click any product for its full history. |
 | **Signals** | A blue dot on everything that changed since your last visit. A *Lowest seen* badge when a price is at its lowest recorded. |
 | **Also** | Search, sort menu, collapse, CSV export, English and Turkish interface following the page language. |
+
+<p align="center">
+  <img src="docs/cards.png" width="900" alt="The card view: each product with its picture, new price, old price, change pill, sparkline and date">
+</p>
 
 <p align="center">
   <img src="docs/list.png" width="900" alt="The list view filtered to drops over the last 30 days">

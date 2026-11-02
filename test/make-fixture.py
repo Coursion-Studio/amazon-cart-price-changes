@@ -8,26 +8,26 @@ OUT = ROOT / "cart" / "fixture.html"
 
 # asin, name, emoji, tint, old price, new price (None = unchanged), list price override, has image
 PRODUCTS = [
-    ("B0SONYXM5A", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black", "🎧", "#eef2f7", 349.99, 278.00, 269.00, True),
-    ("B0BREVILLE", "Breville Barista Express Espresso Machine, Brushed Stainless Steel", "☕", "#f7f1ea", 699.95, 599.95, None, True),
-    ("B0LEGOORCH", "LEGO Icons Orchid Artificial Plant Building Set 10311", "🪴", "#eef7ee", 49.99, 39.99, None, True),
-    ("B0KINDLEPW", "Kindle Paperwhite (16 GB), 6.8\" display, adjustable warm light", "📖", "#f2f2f2", 149.99, 129.99, None, True),
-    ("B0ANKER737", "Anker 737 Power Bank (PowerCore 24K), 140W Three-Port Portable Charger", "🔋", "#eaf1f9", 149.99, 109.99, None, True),
-    ("B0HYDROFLK", "Hydro Flask 32 oz Wide Mouth Bottle with Flex Cap, Pacific", "🥤", "#e9f4f7", 44.95, 32.49, None, False),
-    ("B0LOGIMX3S", "Logitech MX Master 3S Wireless Performance Mouse, Graphite", "🖱️", "#f1f1f3", 99.99, 84.99, None, True),
-    ("B0ATOMICHB", "Atomic Habits: Tiny Changes, Remarkable Results (Hardcover)", "📚", "#fbf3e6", 27.00, 14.49, None, True),
-    ("B0DYSONV8X", "Dyson V8 Cordless Stick Vacuum Cleaner, Silver/Nickel", "🧹", "#f4eef7", 469.99, 379.99, None, True),
-    ("B0NIKEPEG4", "Nike Pegasus 41 Men's Road Running Shoes", "👟", "#fdf0ec", 140.00, 97.97, None, False),
-    ("B0AIRPODS2", "Apple AirPods Pro (2nd Generation) with MagSafe Case (USB-C)", "🎶", "#f3f3f3", 189.00, 249.00, None, True),
-    ("B0SAMODYG5", "Samsung 32\" Odyssey G5 QHD 165Hz Curved Gaming Monitor", "🖥️", "#ebeef5", 279.99, 329.99, None, True),
-    ("B0KEYCHRK2", "Keychron K2 Pro Wireless Mechanical Keyboard, RGB, Hot-swappable", "⌨️", "#f0f0f0", 99.00, 109.00, None, True),
-    ("B0PATAGBH2", "Patagonia Black Hole 25L Backpack, Smolder Blue", "🎒", "#e9eff8", 129.00, 149.00, None, True),
-    ("B0INSTPOT6", "Instant Pot Duo 7-in-1 Electric Pressure Cooker, 6 Quart", "🍲", "#f7efe9", 79.95, 99.95, None, True),
-    ("B0INSTAX12", "Fujifilm Instax Mini 12 Instant Camera, Pastel Blue", "📷", "#e9f3f9", 79.95, 81.95, None, False),
-    ("B0SONICARE", "Philips Sonicare 4100 Rechargeable Electric Toothbrush, White", "🪥", "#f1f6f8", 49.96, 54.96, None, True),
-    ("B0SWITCHOL", "Nintendo Switch OLED Model, White Joy-Con", "🎮", "#fdeeee", None, 349.99, None, True),
-    ("B0BOSEFLEX", "Bose SoundLink Flex Bluetooth Speaker, Black", "🔊", "#f0f0f0", None, 119.00, None, True),
-    ("B0YETIRAMB", "YETI Rambler 20 oz Tumbler with MagSlider Lid, Navy", "🧋", "#e9edf6", None, 38.00, None, True),
+    ("B0SONYXM5A", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black", "🎧", "#e8ebf0", 349.99, 278.00, 269.00, True),
+    ("B0BREVILLE", "Breville Barista Express Espresso Machine, Brushed Stainless Steel", "☕", "#efe7df", 699.95, 599.95, None, True),
+    ("B0LEGOORCH", "LEGO Icons Orchid Artificial Plant Building Set 10311", "🪴", "#e6f0e6", 49.99, 39.99, None, True),
+    ("B0KINDLEPW", "Kindle Paperwhite (16 GB), 6.8\" display, adjustable warm light", "📖", "#e9e9e9", 149.99, 129.99, None, True),
+    ("B0ANKER737", "Anker 737 Power Bank (PowerCore 24K), 140W Three-Port Portable Charger", "🔋", "#e5ecf4", 149.99, 109.99, None, True),
+    ("B0FITBITC6", "Fitbit Charge 6 Fitness Tracker with Heart Rate, Obsidian", "⌚", "#e9ecf2", 159.95, 119.95, None, True),
+    ("B0LOGIMX3S", "Logitech MX Master 3S Wireless Performance Mouse, Graphite", "🖱️", "#e9e9ec", 99.99, 84.99, None, True),
+    ("B0ATOMICHB", "Atomic Habits: Tiny Changes, Remarkable Results (Hardcover)", "📚", "#f2e8d8", 27.00, 14.49, None, True),
+    ("B0DYSONV8X", "Dyson V8 Cordless Stick Vacuum Cleaner, Silver/Nickel", "🧹", "#ebe4ef", 469.99, 379.99, None, True),
+    ("B0NIKEPEG4", "Nike Pegasus 41 Men's Road Running Shoes", "👟", "#f3ece8", 140.00, 97.97, None, True),
+    ("B0AIRPODS2", "Apple AirPods Pro (2nd Generation) with MagSafe Case (USB-C)", "🎶", "#e9e9e9", 189.00, 249.00, None, True),
+    ("B0SAMODYG5", "Samsung 32\" Odyssey G5 QHD 165Hz Curved Gaming Monitor", "🖥️", "#e3e7ef", 279.99, 329.99, None, True),
+    ("B0KEYCHRK2", "Keychron K2 Pro Wireless Mechanical Keyboard, RGB, Hot-swappable", "⌨️", "#e8e8e8", 99.00, 109.00, None, True),
+    ("B0PATAGBH2", "Patagonia Black Hole 25L Backpack, Smolder Blue", "🎒", "#e2e9f3", 129.00, 149.00, None, True),
+    ("B0INSTPOT6", "Instant Pot Duo 7-in-1 Electric Pressure Cooker, 6 Quart", "🍲", "#efe5dd", 79.95, 99.95, None, True),
+    ("B0INSTAX12", "Fujifilm Instax Mini 12 Instant Camera, Pastel Blue", "📷", "#e6edf3", 79.95, 81.95, None, True),
+    ("B0SONICARE", "Philips Sonicare 4100 Rechargeable Electric Toothbrush, White", "🪥", "#e7eef2", 49.96, 54.96, None, True),
+    ("B0SWITCHOL", "Nintendo Switch OLED Model, White Joy-Con", "🎮", "#f3e4e4", None, 349.99, None, True),
+    ("B0BOSEFLEX", "Bose SoundLink Flex Bluetooth Speaker, Black", "🔊", "#e8e8e8", None, 119.00, None, True),
+    ("B0YETIRAMB", "YETI Rambler 20 oz Tumbler with MagSlider Lid, Navy", "🧋", "#e2e7f1", None, 38.00, None, True),
 ]
 LAZY_DATA_SRC = {"B0LOGIMX3S"}
 LAZY_DYNAMIC = {"B0SONICARE"}
@@ -36,9 +36,12 @@ GIF = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=
 
 def picture(emoji, tint):
     svg = (
-        "<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'>"
-        f"<rect width='160' height='160' rx='28' fill='{tint}'/>"
-        f"<text x='80' y='110' font-size='84' text-anchor='middle'>{emoji}</text></svg>"
+        "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>"
+        "<defs><radialGradient id='g' cx='50%' cy='42%' r='70%'><stop offset='0' stop-color='#ffffff'/>"
+        f"<stop offset='1' stop-color='{tint}'/></radialGradient>"
+        "<filter id='s' x='-20%' y='-20%' width='140%' height='140%'><feDropShadow dx='0' dy='8' stdDeviation='7' flood-color='#0b0b0b' flood-opacity='0.22'/></filter></defs>"
+        "<rect width='200' height='200' fill='url(#g)'/>"
+        f"<text x='100' y='138' font-size='108' text-anchor='middle' filter='url(#s)'>{emoji}</text></svg>"
     )
     return "data:image/svg+xml;charset=utf-8," + quote(svg, safe="")
 
