@@ -3,9 +3,11 @@
 **Cart Price Changes for Amazon** runs entirely inside your browser.
 
 - It collects no personal data and sends nothing anywhere. There is no server,
-  no analytics, no account and no network request of its own. The only images
-  it loads are product pictures from Amazon's own image service, the same way
-  the Amazon page loads them.
+  no analytics and no account. Its only network requests go to the Amazon site
+  you are on: product pictures from Amazon's image service, and, when a
+  remembered item has no picture, that item's own product page on the same
+  Amazon site, fetched once to find its picture (at most four items per visit,
+  retried no sooner than a day later).
 - It reads the Amazon cart page you are looking at: the price-change notices
   Amazon shows, and the name, price and picture of the items in your cart and
   saved-for-later list.

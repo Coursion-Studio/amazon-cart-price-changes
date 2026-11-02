@@ -331,6 +331,35 @@
     return { currency: '', placement: 'suffix' };
   }
 
+  function productImageFromHTML(html) {
+    const s = String(html == null ? '' : html);
+    const unescape = (u) => u.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    const patterns = [
+      /"hiRes"\s*:\s*"(https:[^"]+)"/,
+      /"large"\s*:\s*"(https:[^"]+)"/,
+      /id="landingImage"[^>]*?data-old-hires="([^"]+)"/,
+      /data-old-hires="([^"]+)"[^>]*?id="landingImage"/,
+      /<meta[^>]+property="og:image"[^>]+content="([^"]+)"/,
+      /id="landingImage"[^>]*?\ssrc="([^"]+)"/,
+      /id="imgBlkFront"[^>]*?\ssrc="([^"]+)"/,
+    ];
+    for (const re of patterns) {
+      const m = re.exec(s);
+      if (m && m[1]) {
+        const u = unescape(m[1]);
+        if (/^https:\/\//.test(u)) return u;
+      }
+    }
+    const dyn = /id="landingImage"[^>]*?data-a-dynamic-image="([^"]+)"/.exec(s) || /data-a-dynamic-image="([^"]+)"[^>]*?id="landingImage"/.exec(s);
+    if (dyn) {
+      try {
+        const keys = Object.keys(JSON.parse(unescape(dyn[1])));
+        if (keys.length && /^https:\/\//.test(keys[0])) return keys[0];
+      } catch (e) {}
+    }
+    return null;
+  }
+
   function lowestSeen(entry, price) {
     if (!entry || !Array.isArray(entry.points) || entry.points.length < 3) return false;
     return entry.points.every((pt) => price <= pt.p);
@@ -375,6 +404,7 @@
     itemsFromHistory,
     currencyForHost,
     lowestSeen,
+    productImageFromHTML,
     sparkline,
     newKeys,
     groupKind,

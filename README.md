@@ -96,9 +96,9 @@ Supported storefronts: amazon.com.tr, amazon.com, .co.uk, .de, .fr, .it, .es,
 ## Privacy
 
 Nothing leaves your browser. No account, no server, no analytics, no
-permissions. The only network requests are product pictures from Amazon's own
-image service, loaded the same way the Amazon page loads them. Details in
-[PRIVACY.md](PRIVACY.md).
+permissions. The only network requests go to the Amazon site you are on:
+product pictures, and a product's own page when a remembered item has no
+picture. Details in [PRIVACY.md](PRIVACY.md).
 
 ## Development
 
@@ -135,9 +135,10 @@ box only lists what changed since you last looked; from now on every visit
 adds to the history, and the period selector widens the view.
 
 **No picture for an item.** Amazon loads pictures lazily; the extension picks
-them up as they arrive and falls back to Amazon's image service by ASIN. If a
-storefront's markup differs, click **Copy diagnostics** in the footer and open
-an issue with the result.
+them up as they arrive. For an item that is not on the page, it tries Amazon's
+image service by ASIN and then fetches that product's page on the same site
+once to read its picture. If a storefront's markup differs, click **Copy
+diagnostics** in the footer and open an issue with the result.
 
 **Safari?** Not yet. Safari needs an Xcode wrapper; the code has no
 Chrome-specific API, so it would be a packaging job.

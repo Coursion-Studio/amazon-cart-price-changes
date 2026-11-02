@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 — 2026-11-02
+
+- Pictures for remembered items that are not on the page: Amazon's image
+  service is tried for several regions, then the product's own page on the
+  same site is fetched once (at most four items per visit, retried after a
+  day) and its main picture cached.
+
 ## 1.1.0 — 2026-11-02
 
 - Summary tiles now act as filters (all / dropped / increased) and the first

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cart Price Changes for Amazon
 // @namespace    https://github.com/Coursion-Studio/amazon-cart-price-changes
-// @version      1.1.0
+// @version      1.1.1
 // @description  Your Amazon cart and saved-for-later price changes as cards or a table: old vs new, change, history, period filters.
 // @author       Coursion Studio
 // @license      MIT
@@ -374,6 +374,35 @@
     return { currency: '', placement: 'suffix' };
   }
 
+  function productImageFromHTML(html) {
+    const s = String(html == null ? '' : html);
+    const unescape = (u) => u.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    const patterns = [
+      /"hiRes"\s*:\s*"(https:[^"]+)"/,
+      /"large"\s*:\s*"(https:[^"]+)"/,
+      /id="landingImage"[^>]*?data-old-hires="([^"]+)"/,
+      /data-old-hires="([^"]+)"[^>]*?id="landingImage"/,
+      /<meta[^>]+property="og:image"[^>]+content="([^"]+)"/,
+      /id="landingImage"[^>]*?\ssrc="([^"]+)"/,
+      /id="imgBlkFront"[^>]*?\ssrc="([^"]+)"/,
+    ];
+    for (const re of patterns) {
+      const m = re.exec(s);
+      if (m && m[1]) {
+        const u = unescape(m[1]);
+        if (/^https:\/\//.test(u)) return u;
+      }
+    }
+    const dyn = /id="landingImage"[^>]*?data-a-dynamic-image="([^"]+)"/.exec(s) || /data-a-dynamic-image="([^"]+)"[^>]*?id="landingImage"/.exec(s);
+    if (dyn) {
+      try {
+        const keys = Object.keys(JSON.parse(unescape(dyn[1])));
+        if (keys.length && /^https:\/\//.test(keys[0])) return keys[0];
+      } catch (e) {}
+    }
+    return null;
+  }
+
   function lowestSeen(entry, price) {
     if (!entry || !Array.isArray(entry.points) || entry.points.length < 3) return false;
     return entry.points.every((pt) => price <= pt.p);
@@ -418,6 +447,7 @@
     itemsFromHistory,
     currencyForHost,
     lowestSeen,
+    productImageFromHTML,
     sparkline,
     newKeys,
     groupKind,
@@ -620,6 +650,7 @@
     anchor: { node: null, whole: false, after: false },
     hidden: [],
     expanded: new Set(),
+    imageFetches: new Set(),
     query: '',
     showTags: false,
     tracked: 0,
@@ -735,8 +766,42 @@
     return null;
   }
 
-  function asinImageURL(asin) {
-    return 'https://images-na.ssl-images-amazon.com/images/P/' + asin + '.01._SL320_.jpg';
+  const IMAGE_LOCALES = ['01', '03', '02', '08', '09'];
+
+  function asinImageURL(asin, code) {
+    return 'https://images-na.ssl-images-amazon.com/images/P/' + asin + '.' + (code || '01') + '._SL320_.jpg';
+  }
+
+  function rememberImage(key, url) {
+    const entry = history[key];
+    if (!entry || entry.image === url) return;
+    entry.image = url;
+    store.set(HISTORY_KEY, history);
+  }
+
+  function fetchMissingImages(items, now) {
+    if (location.protocol === 'file:' || typeof fetch !== 'function') return;
+    const todo = items
+      .filter((i) => !i.image && /^[A-Z0-9]{10}$/.test(i.key) && i.hist && !(i.hist.imageTriedAt && now - i.hist.imageTriedAt < 86400000) && !state.imageFetches.has(i.key))
+      .slice(0, 4);
+    if (!todo.length) return;
+    for (const item of todo) {
+      item.hist.imageTriedAt = now;
+      state.imageFetches.add(item.key);
+    }
+    store.set(HISTORY_KEY, history);
+    (async () => {
+      for (const item of todo) {
+        try {
+          const res = await fetch(location.origin + '/dp/' + item.key, { credentials: 'same-origin', headers: { Accept: 'text/html' } });
+          if (!res.ok) continue;
+          const url = APC.productImageFromHTML(await res.text());
+          if (!isGoodImageURL(url)) continue;
+          rememberImage(item.key, url);
+          schedule();
+        } catch (e) {}
+      }
+    })();
   }
 
   function findImage(asin) {
@@ -934,13 +999,17 @@
     if (item.image) return el('img', { class: cls, src: item.image, alt: '', loading: 'lazy', decoding: 'async' });
     const asin = /^[A-Z0-9]{10}$/.test(item.key) ? item.key : null;
     if (!asin || location.protocol === 'file:') return empty();
-    const img = el('img', { class: cls, src: asinImageURL(asin), alt: '', loading: 'lazy', decoding: 'async' });
-    const fail = () => {
-      if (img.isConnected) img.replaceWith(empty());
+    let idx = 0;
+    const img = el('img', { class: cls, src: asinImageURL(asin, IMAGE_LOCALES[0]), alt: '', loading: 'lazy', decoding: 'async' });
+    const next = () => {
+      idx++;
+      if (idx < IMAGE_LOCALES.length) img.src = asinImageURL(asin, IMAGE_LOCALES[idx]);
+      else if (img.isConnected) img.replaceWith(empty());
     };
-    img.addEventListener('error', fail);
+    img.addEventListener('error', next);
     img.addEventListener('load', () => {
-      if (img.naturalWidth <= 1) fail();
+      if (img.naturalWidth <= 1) next();
+      else rememberImage(asin, img.src);
     });
     return img;
   }
@@ -1706,6 +1775,7 @@
     if (state.anchor.after) target.insertAdjacentElement('afterend', panel);
     else target.parentNode.insertBefore(panel, target);
     if (live.length) hideOriginals(live, state.anchor);
+    fetchMissingImages(items, now);
   }
 
   let timer = null;

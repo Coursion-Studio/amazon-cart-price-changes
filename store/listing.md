@@ -77,7 +77,9 @@ the panel on that page.
 
 **Data usage:** The extension does not collect or transmit any user data.
 Prices, product names and pictures read from the page are stored only in the
-browser's local storage for the Amazon site. Tick "I do not sell or transfer
+browser's local storage for the Amazon site. Its only requests go to the same
+Amazon site: product pictures, and a product's own page when a remembered
+item has no picture (to read its picture). Tick "I do not sell or transfer
 user data to third parties", "I do not use or transfer user data for purposes
 unrelated to the item's core functionality" and "I do not use or transfer user
 data to determine creditworthiness or for lending purposes". No data types

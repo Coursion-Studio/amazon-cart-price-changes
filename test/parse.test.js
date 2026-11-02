@@ -263,3 +263,16 @@ test('a stale Amazon message and a newer list price never oscillate across re-sc
   APC.recordObservation(h, { key: 'A', name: 'Edifier S360Db 2.1 Hoparlör', price: 47899 }, 2000);
   assert.equal(h.A.name, 'Edifier S360Db 2.1 Hoparlör');
 });
+
+test('productImageFromHTML finds the main picture in a product page', () => {
+  const colorImages = '<script>var data = {"colorImages":{"initial":[{"hiRes":null,"large":"https://m.media-amazon.com/images/I/71abc._AC_SL1500_.jpg"},{"hiRes":"https://m.media-amazon.com/images/I/81xyz._AC_SL1500_.jpg"}]}};</script>';
+  assert.equal(APC.productImageFromHTML(colorImages), 'https://m.media-amazon.com/images/I/81xyz._AC_SL1500_.jpg');
+  const landing = '<img alt="x" src="https://m.media-amazon.com/images/I/small.jpg" data-old-hires="https://m.media-amazon.com/images/I/big.jpg" id="landingImage" class="a-dynamic-image">';
+  assert.equal(APC.productImageFromHTML(landing), 'https://m.media-amazon.com/images/I/big.jpg');
+  const dynamic = '<img id="landingImage" data-a-dynamic-image="{&quot;https://m.media-amazon.com/images/I/dyn.jpg&quot;:[500,500]}" src="data:image/gif;base64,R0lGOD">';
+  assert.equal(APC.productImageFromHTML(dynamic), 'https://m.media-amazon.com/images/I/dyn.jpg');
+  const og = '<meta property="og:image" content="https://m.media-amazon.com/images/I/og.jpg">';
+  assert.equal(APC.productImageFromHTML(og), 'https://m.media-amazon.com/images/I/og.jpg');
+  assert.equal(APC.productImageFromHTML('<html><body>Robot check</body></html>'), null);
+  assert.equal(APC.productImageFromHTML(''), null);
+});
