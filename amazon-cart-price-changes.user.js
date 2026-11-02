@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cart Price Changes for Amazon
 // @namespace    https://github.com/Coursion-Studio/amazon-cart-price-changes
-// @version      1.0.0
+// @version      1.1.0
 // @description  Your Amazon cart and saved-for-later price changes as cards or a table: old vs new, change, history, period filters.
 // @author       Coursion Studio
 // @license      MIT
@@ -37,7 +37,7 @@
 (function () {
   var s = document.createElement('style');
   s.id = 'apc-style';
-  s.textContent = "#apc-panel {\n  --apc-surface: #ffffff;\n  --apc-plane: #f9f9f7;\n  --apc-ink: #0b0b0b;\n  --apc-ink-2: #52514e;\n  --apc-muted: #898781;\n  --apc-grid: #e1e0d9;\n  --apc-axis: #c3c2b7;\n  --apc-border: rgba(11, 11, 11, 0.1);\n  --apc-up: #d03b3b;\n  --apc-down: #0ca30c;\n  --apc-down-text: #006300;\n  --apc-link: #007185;\n  --apc-accent: #2a78d6;\n  --apc-accent-soft: #e8f1fb;\n  --apc-accent-text: #1c5cab;\n  color-scheme: light;\n  display: block;\n  box-sizing: border-box;\n  margin: 0 0 14px;\n  padding: 14px 16px 10px;\n  background: var(--apc-surface);\n  border: 1px solid var(--apc-border);\n  border-radius: 10px;\n  box-shadow: 0 1px 2px rgba(11, 11, 11, 0.04);\n  color: var(--apc-ink);\n  font: 13px/1.4 \"Amazon Ember\", system-ui, -apple-system, \"Segoe UI\", sans-serif;\n  text-align: left;\n}\n#apc-panel *,\n#apc-panel *::before,\n#apc-panel *::after {\n  box-sizing: border-box;\n}\n#apc-panel button {\n  font: inherit;\n}\n\n#apc-panel .apc-head {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  flex-wrap: wrap;\n  margin-bottom: 12px;\n}\n#apc-panel .apc-title-wrap {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  min-width: 0;\n}\n#apc-panel .apc-title {\n  font-size: 16px;\n  font-weight: 700;\n  letter-spacing: -0.01em;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  line-height: 22px;\n}\n#apc-panel .apc-badge {\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--apc-ink-2);\n  background: var(--apc-plane);\n  border: 1px solid var(--apc-border);\n  border-radius: 999px;\n  padding: 0 8px;\n  line-height: 18px;\n}\n#apc-panel .apc-subtitle {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  margin-top: 1px;\n}\n#apc-panel .apc-newdot {\n  display: inline-block;\n  width: 7px;\n  height: 7px;\n  border-radius: 50%;\n  background: var(--apc-accent);\n}\n#apc-panel .apc-controls {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  flex-wrap: wrap;\n}\n#apc-panel .apc-search {\n  appearance: none;\n  -webkit-appearance: none;\n  height: 28px;\n  min-width: 180px;\n  padding: 0 10px;\n  font: inherit;\n  font-size: 12px;\n  color: var(--apc-ink);\n  background: var(--apc-surface);\n  border: 1px solid rgba(11, 11, 11, 0.18);\n  border-radius: 6px;\n  margin: 0;\n  outline: none;\n}\n#apc-panel .apc-search:focus {\n  border-color: var(--apc-accent);\n  box-shadow: 0 0 0 3px rgba(42, 120, 214, 0.2);\n}\n#apc-panel .apc-search::placeholder {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-seg {\n  display: inline-flex;\n  border: 1px solid rgba(11, 11, 11, 0.18);\n  border-radius: 6px;\n  overflow: hidden;\n  height: 28px;\n}\n#apc-panel .apc-segbtn {\n  appearance: none;\n  background: var(--apc-surface);\n  border: 0;\n  margin: 0;\n  padding: 0 11px;\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  cursor: pointer;\n  line-height: 26px;\n  transition: background 0.12s;\n}\n#apc-panel .apc-segbtn + .apc-segbtn {\n  border-left: 1px solid rgba(11, 11, 11, 0.18);\n}\n#apc-panel .apc-segbtn:hover {\n  background: var(--apc-plane);\n}\n#apc-panel .apc-segbtn.active {\n  background: var(--apc-ink);\n  color: #fff;\n}\n\n#apc-panel .apc-chevron {\n  appearance: none;\n  width: 24px;\n  height: 24px;\n  padding: 0;\n  border: 0;\n  border-radius: 6px;\n  background: none;\n  color: var(--apc-muted);\n  font-size: 18px;\n  line-height: 24px;\n  cursor: pointer;\n  transition: transform 0.15s ease, background 0.12s, color 0.12s;\n}\n#apc-panel .apc-chevron:hover {\n  background: var(--apc-plane);\n  color: var(--apc-ink);\n}\n#apc-panel .apc-collapse {\n  transform: rotate(90deg);\n  margin-left: -6px;\n}\n#apc-panel.collapsed .apc-collapse {\n  transform: rotate(0deg);\n}\n#apc-panel.collapsed .apc-controls,\n#apc-panel.collapsed .apc-table,\n#apc-panel.collapsed .apc-foot {\n  display: none;\n}\n#apc-panel.collapsed .apc-kpis {\n  margin-bottom: 2px;\n}\n\n#apc-panel .apc-kpis {\n  display: grid;\n  grid-template-columns: repeat(4, minmax(0, 1fr));\n  gap: 8px;\n  margin: 0 0 12px;\n}\n#apc-panel .apc-tile {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  min-width: 0;\n  background: var(--apc-plane);\n  border: 1px solid rgba(11, 11, 11, 0.06);\n  border-radius: 8px;\n  padding: 9px 10px 8px;\n}\n#apc-panel .apc-tile-body {\n  min-width: 0;\n  flex: 1 1 auto;\n}\n#apc-panel .apc-tile-label {\n  font-size: 11px;\n  color: var(--apc-ink-2);\n  margin-bottom: 2px;\n}\n#apc-panel .apc-tile-value {\n  font-size: 20px;\n  font-weight: 600;\n  line-height: 1.2;\n  color: var(--apc-ink);\n  white-space: nowrap;\n}\n#apc-panel .apc-tile-value.up {\n  color: var(--apc-up);\n}\n#apc-panel .apc-tile-value.down {\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-tile-sub {\n  margin-top: 2px;\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel .apc-tile-thumb {\n  flex: 0 0 auto;\n  width: 44px;\n  height: 44px;\n  object-fit: contain;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 8px;\n}\n\n#apc-panel .apc-table {\n  width: 100%;\n  border-collapse: collapse;\n  border-spacing: 0;\n  table-layout: auto;\n}\n#apc-panel .apc-table th {\n  text-align: left;\n  padding: 4px 8px;\n  border-bottom: 1px solid var(--apc-grid);\n  white-space: nowrap;\n  vertical-align: middle;\n}\n#apc-panel .apc-th {\n  appearance: none;\n  background: none;\n  border: 0;\n  margin: 0;\n  padding: 2px 0;\n  font-size: 11px;\n  font-weight: 600;\n  letter-spacing: 0.02em;\n  text-transform: uppercase;\n  color: var(--apc-ink-2);\n  cursor: pointer;\n  border-radius: 4px;\n  transition: color 0.12s;\n}\n#apc-panel .apc-th:hover,\n#apc-panel .apc-th.active {\n  color: var(--apc-ink);\n}\n#apc-panel .apc-sortmark {\n  display: inline-block;\n  min-width: 10px;\n  margin-left: 3px;\n  color: var(--apc-accent-text);\n  font-size: 11px;\n}\n#apc-panel th.apc-num .apc-th {\n  text-align: right;\n}\n#apc-panel .apc-table td {\n  padding: 5px 8px;\n  border-bottom: 1px solid #f0efec;\n  vertical-align: middle;\n  font-size: 13px;\n  line-height: 20px;\n}\n#apc-panel .apc-table tbody tr:last-child td {\n  border-bottom: 0;\n}\n#apc-panel .apc-row {\n  cursor: pointer;\n}\n#apc-panel .apc-row td {\n  transition: background 0.12s;\n}\n#apc-panel .apc-row:hover td,\n#apc-panel .apc-row.expanded td {\n  background: var(--apc-plane);\n}\n#apc-panel .apc-row.expanded td {\n  border-bottom-color: transparent;\n}\n\n#apc-panel th.apc-thumb,\n#apc-panel td.apc-thumb {\n  width: 44px;\n  padding-right: 2px;\n}\n#apc-panel .apc-thumb-img {\n  display: block;\n  width: 34px;\n  height: 34px;\n  object-fit: contain;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 6px;\n}\n#apc-panel .apc-thumb-empty {\n  background: linear-gradient(135deg, #f0efec, #f9f9f7);\n}\n#apc-panel th.apc-num,\n#apc-panel td.apc-num {\n  text-align: right;\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel td.apc-name {\n  width: 100%;\n  max-width: 0;\n}\n#apc-panel .apc-name-wrap {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  min-width: 0;\n}\n#apc-panel td.apc-name a {\n  flex: 0 1 auto;\n  min-width: 0;\n  color: var(--apc-ink);\n  text-decoration: none;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel td.apc-name a:hover {\n  color: var(--apc-link);\n  text-decoration: underline;\n}\n#apc-panel .apc-chip {\n  flex: 0 0 auto;\n  display: inline-block;\n  padding: 0 6px;\n  font-size: 10px;\n  font-weight: 600;\n  letter-spacing: 0.01em;\n  line-height: 16px;\n  border-radius: 999px;\n  background: #f0efec;\n  color: var(--apc-ink-2);\n  white-space: nowrap;\n}\n#apc-panel .apc-chip.new {\n  background: var(--apc-accent-soft);\n  color: var(--apc-accent-text);\n}\n#apc-panel .apc-chip.lowest {\n  background: #e6f4e6;\n  color: var(--apc-down-text);\n}\n#apc-panel td.apc-was {\n  color: var(--apc-muted);\n}\n#apc-panel td.apc-now {\n  font-weight: 600;\n}\n#apc-panel td.apc-delta {\n  font-weight: 600;\n}\n#apc-panel td.apc-delta.up {\n  color: var(--apc-up);\n}\n#apc-panel td.apc-delta.down {\n  color: var(--apc-down-text);\n}\n#apc-panel td.apc-delta.same {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-arrow {\n  font-size: 9px;\n  vertical-align: 1px;\n}\n#apc-panel .apc-pct {\n  display: inline-block;\n  min-width: 56px;\n  margin-left: 8px;\n  font-weight: 400;\n  color: var(--apc-ink-2);\n}\n\n#apc-panel th.apc-bar,\n#apc-panel td.apc-bar {\n  width: 190px;\n  min-width: 190px;\n  padding-left: 12px;\n  padding-right: 12px;\n}\n#apc-panel .apc-axis {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  color: var(--apc-muted);\n  font-size: 9px;\n}\n#apc-panel .apc-track {\n  position: relative;\n  height: 12px;\n}\n#apc-panel .apc-track::before {\n  content: \"\";\n  position: absolute;\n  left: 50%;\n  top: 0;\n  bottom: 0;\n  width: 1px;\n  background: var(--apc-axis);\n}\n#apc-panel .apc-fill {\n  position: absolute;\n  top: 2px;\n  height: 8px;\n  min-width: 2px;\n  display: block;\n}\n#apc-panel .apc-fill.up {\n  left: calc(50% + 1px);\n  background: var(--apc-up);\n  border-radius: 0 4px 4px 0;\n  transform-origin: left center;\n}\n#apc-panel .apc-fill.down {\n  right: 50%;\n  background: var(--apc-down);\n  border-radius: 4px 0 0 4px;\n  transform-origin: right center;\n}\n@keyframes apc-grow {\n  from {\n    transform: scaleX(0);\n  }\n  to {\n    transform: scaleX(1);\n  }\n}\n#apc-panel .apc-table.animate .apc-fill {\n  animation: apc-grow 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;\n}\n@media (prefers-reduced-motion: reduce) {\n  #apc-panel .apc-table.animate .apc-fill {\n    animation: none;\n  }\n  #apc-panel .apc-chevron {\n    transition: none;\n  }\n}\n#apc-panel th.apc-more,\n#apc-panel td.apc-more {\n  width: 32px;\n  padding-left: 0;\n  padding-right: 4px;\n  text-align: right;\n}\n#apc-panel .apc-row.expanded .apc-chevron {\n  transform: rotate(90deg);\n  color: var(--apc-ink);\n}\n#apc-panel .apc-empty td {\n  color: var(--apc-muted);\n  text-align: center;\n  padding: 14px;\n}\n\n#apc-panel .apc-details td {\n  background: var(--apc-plane);\n  padding: 4px 14px 14px 52px;\n  border-bottom: 1px solid var(--apc-grid);\n}\n#apc-panel .apc-detail {\n  display: flex;\n  align-items: flex-start;\n  gap: 16px;\n}\n#apc-panel .apc-detail-img {\n  flex: 0 0 auto;\n  width: 76px;\n  height: 76px;\n  object-fit: contain;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 8px;\n}\n#apc-panel .apc-detail-main {\n  flex: 1 1 auto;\n  min-width: 0;\n}\n#apc-panel .apc-detail-title {\n  display: block;\n  margin: 2px 0 4px;\n  font-weight: 600;\n  color: var(--apc-ink);\n  text-decoration: none;\n  line-height: 1.35;\n}\n#apc-panel .apc-detail-title:hover {\n  color: var(--apc-link);\n  text-decoration: underline;\n}\n#apc-panel .apc-detail-meta {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 6px;\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  margin-bottom: 10px;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-detail-now {\n  color: var(--apc-ink);\n  font-weight: 600;\n}\n#apc-panel .apc-detail-delta {\n  font-weight: 600;\n}\n#apc-panel .apc-detail-delta.up {\n  color: var(--apc-up);\n}\n#apc-panel .apc-detail-delta.down {\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-detail-label {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  font-size: 11px;\n  font-weight: 600;\n  letter-spacing: 0.02em;\n  text-transform: uppercase;\n  color: var(--apc-ink-2);\n  margin-bottom: 4px;\n}\n#apc-panel .apc-detail-count {\n  font-weight: 400;\n  text-transform: none;\n  letter-spacing: 0;\n  color: var(--apc-muted);\n}\n#apc-panel .apc-detail-history-row {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  flex-wrap: wrap;\n}\n#apc-panel .apc-spark {\n  flex: 0 0 auto;\n  display: block;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 6px;\n}\n#apc-panel .apc-points {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 4px 8px;\n  font-size: 12px;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-pt {\n  display: inline-flex;\n  flex-direction: column;\n  line-height: 1.2;\n}\n#apc-panel .apc-pt-t {\n  font-size: 10px;\n  color: var(--apc-muted);\n}\n#apc-panel .apc-pt-p {\n  color: var(--apc-ink-2);\n}\n#apc-panel .apc-pt.current .apc-pt-p {\n  color: var(--apc-ink);\n  font-weight: 600;\n}\n#apc-panel .apc-pt-arrow {\n  color: var(--apc-axis);\n}\n#apc-panel .apc-btn {\n  flex: 0 0 auto;\n  align-self: center;\n  padding: 6px 12px;\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--apc-ink);\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.18);\n  border-radius: 999px;\n  text-decoration: none;\n  white-space: nowrap;\n  transition: background 0.12s, border-color 0.12s;\n}\n#apc-panel .apc-btn:hover {\n  background: var(--apc-plane);\n  border-color: rgba(11, 11, 11, 0.3);\n  text-decoration: none;\n}\n\n#apc-panel .apc-foot {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid var(--apc-grid);\n  font-size: 12px;\n  color: var(--apc-ink-2);\n}\n#apc-panel .apc-legend {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n}\n#apc-panel .apc-dot {\n  display: inline-block;\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n}\n#apc-panel .apc-dot + * {\n  margin-right: 8px;\n}\n#apc-panel .apc-dot.up {\n  background: var(--apc-up);\n}\n#apc-panel .apc-dot.down {\n  background: var(--apc-down);\n}\n#apc-panel .apc-net {\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-net b {\n  font-weight: 600;\n  color: var(--apc-ink);\n}\n#apc-panel .apc-net b.up {\n  color: var(--apc-up);\n}\n#apc-panel .apc-net b.down {\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-spacer {\n  flex: 1 1 auto;\n}\n#apc-panel .apc-sep {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-linkbtn {\n  appearance: none;\n  background: none;\n  border: 0;\n  margin: 0;\n  padding: 0;\n  font-size: 12px;\n  color: var(--apc-link);\n  cursor: pointer;\n}\n#apc-panel .apc-linkbtn:hover {\n  text-decoration: underline;\n}\n\n@media (max-width: 860px) {\n  #apc-panel .apc-kpis {\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n  }\n  #apc-panel th.apc-bar,\n  #apc-panel td.apc-bar,\n  #apc-panel th.apc-thumb,\n  #apc-panel td.apc-thumb {\n    display: none;\n  }\n  #apc-panel .apc-details td {\n    padding-left: 14px;\n  }\n}\n\n#apc-panel th.apc-when,\n#apc-panel td.apc-when {\n  width: 72px;\n  white-space: nowrap;\n  color: var(--apc-muted);\n  font-size: 12px;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-name-wrap .apc-newdot {\n  flex: 0 0 auto;\n  width: 6px;\n  height: 6px;\n}\n#apc-panel .apc-name-text {\n  flex: 0 1 auto;\n  min-width: 0;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel .apc-detail-when {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-detail-actions {\n  flex: 0 0 auto;\n  align-self: center;\n  display: flex;\n  flex-direction: column;\n  align-items: flex-end;\n  gap: 8px;\n}\n#apc-panel .apc-forget {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-forget:hover {\n  color: var(--apc-up);\n}\n#apc-panel .apc-clear {\n  color: var(--apc-muted);\n}\n@media (max-width: 860px) {\n  #apc-panel th.apc-when,\n  #apc-panel td.apc-when {\n    display: none;\n  }\n}\n\n#apc-panel .apc-tile-link {\n  cursor: pointer;\n  transition: border-color 0.12s, box-shadow 0.12s;\n}\n#apc-panel .apc-tile-link:hover,\n#apc-panel .apc-tile-link:focus-visible {\n  border-color: rgba(11, 11, 11, 0.2);\n  box-shadow: 0 1px 4px rgba(11, 11, 11, 0.08);\n  outline: none;\n}\n\n#apc-panel.view-cards .apc-table,\n#apc-panel.view-list .apc-grid {\n  display: none;\n}\n#apc-panel .apc-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(208px, 1fr));\n  gap: 10px;\n  margin-bottom: 2px;\n}\n#apc-panel .apc-card {\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  min-width: 0;\n  background: var(--apc-surface);\n  border: 1px solid var(--apc-border);\n  border-top: 3px solid var(--apc-axis);\n  border-radius: 10px;\n  overflow: hidden;\n  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;\n}\n#apc-panel .apc-card.up {\n  border-top-color: var(--apc-up);\n}\n#apc-panel .apc-card.down {\n  border-top-color: var(--apc-down);\n}\n#apc-panel .apc-card:hover {\n  box-shadow: 0 4px 14px rgba(11, 11, 11, 0.1);\n  transform: translateY(-1px);\n}\n#apc-panel .apc-card-media {\n  position: relative;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  height: 118px;\n  padding: 10px;\n  background: #fff;\n  border-bottom: 1px solid #f0efec;\n  text-decoration: none;\n}\n#apc-panel .apc-card-img {\n  display: block;\n  max-width: 100%;\n  max-height: 100%;\n  width: auto;\n  height: auto;\n  object-fit: contain;\n}\n#apc-panel .apc-card-media .apc-thumb-empty {\n  width: 72px;\n  height: 72px;\n  border-radius: 10px;\n}\n#apc-panel .apc-card-new {\n  position: absolute;\n  top: 8px;\n  left: 8px;\n  width: 8px;\n  height: 8px;\n  box-shadow: 0 0 0 2px #fff;\n}\n#apc-panel .apc-card-ribbon {\n  position: absolute;\n  top: 8px;\n  right: 8px;\n}\n#apc-panel .apc-card-body {\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n  padding: 10px 11px 10px;\n}\n#apc-panel .apc-card-title {\n  display: -webkit-box;\n  -webkit-line-clamp: 2;\n  -webkit-box-orient: vertical;\n  overflow: hidden;\n  min-height: 34px;\n  font-size: 12.5px;\n  line-height: 17px;\n  color: var(--apc-ink);\n  text-decoration: none;\n}\n#apc-panel a.apc-card-title:hover {\n  color: var(--apc-link);\n  text-decoration: underline;\n}\n#apc-panel .apc-card-prices {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  flex-wrap: wrap;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-card-now {\n  font-size: 18px;\n  font-weight: 700;\n  letter-spacing: -0.01em;\n  color: var(--apc-ink);\n  white-space: nowrap;\n}\n#apc-panel .apc-card-was {\n  font-size: 12px;\n  color: var(--apc-muted);\n  text-decoration: line-through;\n  white-space: nowrap;\n}\n#apc-panel .apc-pill {\n  align-self: flex-start;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 9px 2px 8px;\n  border-radius: 999px;\n  font-size: 12px;\n  font-weight: 600;\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-pill.down {\n  background: #e6f4e6;\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-pill.up {\n  background: #fbe9e9;\n  color: #b22c2c;\n}\n#apc-panel .apc-pill .apc-arrow {\n  font-size: 8px;\n}\n#apc-panel .apc-pill-pct {\n  font-weight: 500;\n  opacity: 0.85;\n  margin-left: 2px;\n}\n#apc-panel .apc-card-meta {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin-top: 2px;\n  font-size: 11px;\n  color: var(--apc-muted);\n}\n#apc-panel .apc-card-meta .apc-spark {\n  width: 110px;\n  height: 26px;\n  flex: 0 0 auto;\n  border: 0;\n  background: transparent;\n}\n#apc-panel .apc-card-when {\n  flex: 1 1 auto;\n  min-width: 0;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel .apc-card-more {\n  flex: 0 0 auto;\n  margin-right: -6px;\n}\n#apc-panel .apc-card.expanded .apc-card-more {\n  transform: rotate(90deg);\n  color: var(--apc-ink);\n}\n#apc-panel .apc-card-details {\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n  padding: 8px 11px 10px;\n  border-top: 1px solid #f0efec;\n  background: var(--apc-plane);\n}\n#apc-panel .apc-card-details .apc-points {\n  font-size: 11px;\n}\n#apc-panel .apc-card.flash,\n#apc-panel .apc-row.flash td {\n  box-shadow: 0 0 0 3px rgba(42, 120, 214, 0.4);\n}\n#apc-panel .apc-row.flash td:first-child {\n  border-radius: 6px 0 0 6px;\n}\n#apc-panel .apc-row.flash td:last-child {\n  border-radius: 0 6px 6px 0;\n}\n#apc-panel .apc-empty-state {\n  grid-column: 1 / -1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 12px;\n  padding: 26px 14px;\n  color: var(--apc-muted);\n  background: var(--apc-plane);\n  border: 1px dashed var(--apc-grid);\n  border-radius: 10px;\n}\n#apc-panel .apc-empty td {\n  padding: 8px 0;\n}\n#apc-panel .apc-diag {\n  color: var(--apc-muted);\n}\n@media (prefers-reduced-motion: reduce) {\n  #apc-panel .apc-card,\n  #apc-panel .apc-tile-link {\n    transition: none;\n  }\n}\n";
+  s.textContent = "#apc-panel {\n  --apc-surface: #ffffff;\n  --apc-plane: #f9f9f7;\n  --apc-ink: #0b0b0b;\n  --apc-ink-2: #52514e;\n  --apc-muted: #898781;\n  --apc-grid: #e1e0d9;\n  --apc-axis: #c3c2b7;\n  --apc-border: rgba(11, 11, 11, 0.1);\n  --apc-up: #d03b3b;\n  --apc-down: #0ca30c;\n  --apc-down-text: #006300;\n  --apc-link: #007185;\n  --apc-accent: #2a78d6;\n  --apc-accent-soft: #e8f1fb;\n  --apc-accent-text: #1c5cab;\n  color-scheme: light;\n  display: block;\n  box-sizing: border-box;\n  margin: 0 0 14px;\n  padding: 14px 16px 10px;\n  background: var(--apc-surface);\n  border: 1px solid var(--apc-border);\n  border-radius: 10px;\n  box-shadow: 0 1px 2px rgba(11, 11, 11, 0.04);\n  color: var(--apc-ink);\n  font: 13px/1.4 \"Amazon Ember\", system-ui, -apple-system, \"Segoe UI\", sans-serif;\n  text-align: left;\n}\n#apc-panel *,\n#apc-panel *::before,\n#apc-panel *::after {\n  box-sizing: border-box;\n}\n#apc-panel button {\n  font: inherit;\n}\n\n#apc-panel .apc-head {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  flex-wrap: wrap;\n  margin-bottom: 12px;\n}\n#apc-panel .apc-title-wrap {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  min-width: 0;\n}\n#apc-panel .apc-title {\n  font-size: 16px;\n  font-weight: 700;\n  letter-spacing: -0.01em;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  line-height: 22px;\n}\n#apc-panel .apc-badge {\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--apc-ink-2);\n  background: var(--apc-plane);\n  border: 1px solid var(--apc-border);\n  border-radius: 999px;\n  padding: 0 8px;\n  line-height: 18px;\n}\n#apc-panel .apc-subtitle {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  margin-top: 1px;\n}\n#apc-panel .apc-newdot {\n  display: inline-block;\n  width: 7px;\n  height: 7px;\n  border-radius: 50%;\n  background: var(--apc-accent);\n}\n#apc-panel .apc-controls {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  flex-wrap: wrap;\n}\n#apc-panel .apc-search {\n  appearance: none;\n  -webkit-appearance: none;\n  height: 28px;\n  min-width: 180px;\n  padding: 0 10px;\n  font: inherit;\n  font-size: 12px;\n  color: var(--apc-ink);\n  background: var(--apc-surface);\n  border: 1px solid rgba(11, 11, 11, 0.18);\n  border-radius: 6px;\n  margin: 0;\n  outline: none;\n}\n#apc-panel .apc-search:focus {\n  border-color: var(--apc-accent);\n  box-shadow: 0 0 0 3px rgba(42, 120, 214, 0.2);\n}\n#apc-panel .apc-search::placeholder {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-seg {\n  display: inline-flex;\n  border: 1px solid rgba(11, 11, 11, 0.18);\n  border-radius: 6px;\n  overflow: hidden;\n  height: 28px;\n}\n#apc-panel .apc-segbtn {\n  appearance: none;\n  background: var(--apc-surface);\n  border: 0;\n  margin: 0;\n  padding: 0 11px;\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  cursor: pointer;\n  line-height: 26px;\n  transition: background 0.12s;\n}\n#apc-panel .apc-segbtn + .apc-segbtn {\n  border-left: 1px solid rgba(11, 11, 11, 0.18);\n}\n#apc-panel .apc-segbtn:hover {\n  background: var(--apc-plane);\n}\n#apc-panel .apc-segbtn.active {\n  background: var(--apc-ink);\n  color: #fff;\n}\n\n#apc-panel .apc-chevron {\n  appearance: none;\n  width: 24px;\n  height: 24px;\n  padding: 0;\n  border: 0;\n  border-radius: 6px;\n  background: none;\n  color: var(--apc-muted);\n  font-size: 18px;\n  line-height: 24px;\n  cursor: pointer;\n  transition: transform 0.15s ease, background 0.12s, color 0.12s;\n}\n#apc-panel .apc-chevron:hover {\n  background: var(--apc-plane);\n  color: var(--apc-ink);\n}\n#apc-panel .apc-collapse {\n  transform: rotate(90deg);\n  margin-left: -6px;\n}\n#apc-panel.collapsed .apc-collapse {\n  transform: rotate(0deg);\n}\n#apc-panel.collapsed .apc-controls,\n#apc-panel.collapsed .apc-table,\n#apc-panel.collapsed .apc-foot {\n  display: none;\n}\n#apc-panel.collapsed .apc-kpis {\n  margin-bottom: 2px;\n}\n\n#apc-panel .apc-kpis {\n  display: grid;\n  grid-template-columns: 1.15fr 1fr 1fr 1.35fr 1.35fr;\n  gap: 8px;\n  margin: 0 0 10px;\n}\n#apc-panel .apc-stat,\n#apc-panel .apc-hl {\n  appearance: none;\n  display: flex;\n  min-width: 0;\n  margin: 0;\n  text-align: left;\n  font: inherit;\n  color: var(--apc-ink);\n  background: var(--apc-plane);\n  border: 1px solid rgba(11, 11, 11, 0.06);\n  border-radius: 10px;\n  padding: 9px 11px 8px;\n  cursor: pointer;\n  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;\n}\n#apc-panel .apc-stat {\n  flex-direction: column;\n  gap: 2px;\n}\n#apc-panel .apc-hl {\n  align-items: center;\n  gap: 10px;\n}\n#apc-panel .apc-hl.empty {\n  cursor: default;\n}\n#apc-panel .apc-stat:hover,\n#apc-panel .apc-hl:not(.empty):hover {\n  border-color: rgba(11, 11, 11, 0.2);\n  background: #fff;\n}\n#apc-panel .apc-stat.active {\n  background: #fff;\n  border-color: var(--apc-ink);\n  box-shadow: inset 0 0 0 1px var(--apc-ink);\n}\n#apc-panel .apc-stat:focus-visible,\n#apc-panel .apc-hl:focus-visible {\n  outline: 2px solid rgba(42, 120, 214, 0.5);\n  outline-offset: 1px;\n}\n#apc-panel .apc-stat-label {\n  font-size: 11px;\n  color: var(--apc-ink-2);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel .apc-stat-value {\n  font-size: 20px;\n  font-weight: 600;\n  line-height: 1.2;\n  color: var(--apc-ink);\n  white-space: nowrap;\n}\n#apc-panel .apc-stat.down .apc-stat-value,\n#apc-panel .apc-stat-value.down {\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-stat.up .apc-stat-value,\n#apc-panel .apc-stat-value.up {\n  color: var(--apc-up);\n}\n#apc-panel .apc-stat-sub {\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel .apc-spread {\n  display: flex;\n  gap: 2px;\n  height: 6px;\n  margin-top: 6px;\n  border-radius: 3px;\n  overflow: hidden;\n}\n#apc-panel .apc-spread i {\n  display: block;\n  height: 100%;\n  border-radius: 3px;\n}\n#apc-panel .apc-spread .down {\n  background: var(--apc-down);\n}\n#apc-panel .apc-spread .up {\n  background: var(--apc-up);\n}\n#apc-panel .apc-hl-thumb {\n  flex: 0 0 auto;\n  width: 46px;\n  height: 46px;\n  object-fit: contain;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 8px;\n}\n#apc-panel .apc-hl-body {\n  min-width: 0;\n  flex: 1 1 auto;\n}\n#apc-panel .apc-toolbar {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  flex-wrap: wrap;\n  margin: 0 0 12px;\n}\n#apc-panel .apc-toolbar-left {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n#apc-panel .apc-toolbar-label,\n#apc-panel .apc-sort {\n  font-size: 12px;\n  color: var(--apc-ink-2);\n}\n#apc-panel .apc-sort {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n}\n#apc-panel .apc-select {\n  appearance: auto;\n  height: 28px;\n  margin: 0;\n  padding: 0 6px;\n  font: inherit;\n  font-size: 12px;\n  color: var(--apc-ink);\n  background: var(--apc-surface);\n  border: 1px solid rgba(11, 11, 11, 0.18);\n  border-radius: 6px;\n}\n#apc-panel.collapsed .apc-toolbar {\n  display: none;\n}\n\n#apc-panel .apc-table {\n  width: 100%;\n  border-collapse: collapse;\n  border-spacing: 0;\n  table-layout: auto;\n}\n#apc-panel .apc-table th {\n  text-align: left;\n  padding: 4px 8px;\n  border-bottom: 1px solid var(--apc-grid);\n  white-space: nowrap;\n  vertical-align: middle;\n}\n#apc-panel .apc-th {\n  appearance: none;\n  background: none;\n  border: 0;\n  margin: 0;\n  padding: 2px 0;\n  font-size: 11px;\n  font-weight: 600;\n  letter-spacing: 0.02em;\n  text-transform: uppercase;\n  color: var(--apc-ink-2);\n  cursor: pointer;\n  border-radius: 4px;\n  transition: color 0.12s;\n}\n#apc-panel .apc-th:hover,\n#apc-panel .apc-th.active {\n  color: var(--apc-ink);\n}\n#apc-panel .apc-sortmark {\n  display: inline-block;\n  min-width: 10px;\n  margin-left: 3px;\n  color: var(--apc-accent-text);\n  font-size: 11px;\n}\n#apc-panel th.apc-num .apc-th {\n  text-align: right;\n}\n#apc-panel .apc-table td {\n  padding: 5px 8px;\n  border-bottom: 1px solid #f0efec;\n  vertical-align: middle;\n  font-size: 13px;\n  line-height: 20px;\n}\n#apc-panel .apc-table tbody tr:last-child td {\n  border-bottom: 0;\n}\n#apc-panel .apc-row {\n  cursor: pointer;\n}\n#apc-panel .apc-row td {\n  transition: background 0.12s;\n}\n#apc-panel .apc-row:hover td,\n#apc-panel .apc-row.expanded td {\n  background: var(--apc-plane);\n}\n#apc-panel .apc-row.expanded td {\n  border-bottom-color: transparent;\n}\n\n#apc-panel th.apc-thumb,\n#apc-panel td.apc-thumb {\n  width: 44px;\n  padding-right: 2px;\n}\n#apc-panel .apc-thumb-img {\n  display: block;\n  width: 34px;\n  height: 34px;\n  object-fit: contain;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 6px;\n}\n#apc-panel .apc-thumb-empty {\n  background: #f4f4f1 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c3c2b7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Ccircle cx='9' cy='10' r='1.6'/%3E%3Cpath d='M21 16l-5-5-8 8'/%3E%3C/svg%3E\") center / 46% no-repeat;\n}\n#apc-panel th.apc-num,\n#apc-panel td.apc-num {\n  text-align: right;\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel td.apc-name {\n  width: 100%;\n  max-width: 0;\n}\n#apc-panel .apc-name-wrap {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  min-width: 0;\n}\n#apc-panel td.apc-name a {\n  flex: 0 1 auto;\n  min-width: 0;\n  color: var(--apc-ink);\n  text-decoration: none;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel td.apc-name a:hover {\n  color: var(--apc-link);\n  text-decoration: underline;\n}\n#apc-panel .apc-chip {\n  flex: 0 0 auto;\n  display: inline-block;\n  padding: 0 6px;\n  font-size: 10px;\n  font-weight: 600;\n  letter-spacing: 0.01em;\n  line-height: 16px;\n  border-radius: 999px;\n  background: #f0efec;\n  color: var(--apc-ink-2);\n  white-space: nowrap;\n}\n#apc-panel .apc-chip.new {\n  background: var(--apc-accent-soft);\n  color: var(--apc-accent-text);\n}\n#apc-panel .apc-chip.lowest {\n  background: #e6f4e6;\n  color: var(--apc-down-text);\n}\n#apc-panel td.apc-was {\n  color: var(--apc-muted);\n}\n#apc-panel td.apc-now {\n  font-weight: 600;\n}\n#apc-panel td.apc-delta {\n  font-weight: 600;\n}\n#apc-panel td.apc-delta.up {\n  color: var(--apc-up);\n}\n#apc-panel td.apc-delta.down {\n  color: var(--apc-down-text);\n}\n#apc-panel td.apc-delta.same {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-arrow {\n  font-size: 9px;\n  vertical-align: 1px;\n}\n#apc-panel .apc-pct {\n  display: inline-block;\n  min-width: 56px;\n  margin-left: 8px;\n  font-weight: 400;\n  color: var(--apc-ink-2);\n}\n\n#apc-panel th.apc-bar,\n#apc-panel td.apc-bar {\n  width: 190px;\n  min-width: 190px;\n  padding-left: 12px;\n  padding-right: 12px;\n}\n#apc-panel .apc-axis {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  color: var(--apc-muted);\n  font-size: 9px;\n}\n#apc-panel .apc-track {\n  position: relative;\n  height: 12px;\n}\n#apc-panel .apc-track::before {\n  content: \"\";\n  position: absolute;\n  left: 50%;\n  top: 0;\n  bottom: 0;\n  width: 1px;\n  background: var(--apc-axis);\n}\n#apc-panel .apc-fill {\n  position: absolute;\n  top: 2px;\n  height: 8px;\n  min-width: 2px;\n  display: block;\n}\n#apc-panel .apc-fill.up {\n  left: calc(50% + 1px);\n  background: var(--apc-up);\n  border-radius: 0 4px 4px 0;\n  transform-origin: left center;\n}\n#apc-panel .apc-fill.down {\n  right: 50%;\n  background: var(--apc-down);\n  border-radius: 4px 0 0 4px;\n  transform-origin: right center;\n}\n@keyframes apc-grow {\n  from {\n    transform: scaleX(0);\n  }\n  to {\n    transform: scaleX(1);\n  }\n}\n#apc-panel .apc-table.animate .apc-fill {\n  animation: apc-grow 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;\n}\n@media (prefers-reduced-motion: reduce) {\n  #apc-panel .apc-table.animate .apc-fill {\n    animation: none;\n  }\n  #apc-panel .apc-chevron {\n    transition: none;\n  }\n}\n#apc-panel th.apc-more,\n#apc-panel td.apc-more {\n  width: 32px;\n  padding-left: 0;\n  padding-right: 4px;\n  text-align: right;\n}\n#apc-panel .apc-row.expanded .apc-chevron {\n  transform: rotate(90deg);\n  color: var(--apc-ink);\n}\n#apc-panel .apc-empty td {\n  color: var(--apc-muted);\n  text-align: center;\n  padding: 14px;\n}\n\n#apc-panel .apc-details td {\n  background: var(--apc-plane);\n  padding: 4px 14px 14px 52px;\n  border-bottom: 1px solid var(--apc-grid);\n}\n#apc-panel .apc-detail {\n  display: flex;\n  align-items: flex-start;\n  gap: 16px;\n}\n#apc-panel .apc-detail-img {\n  flex: 0 0 auto;\n  width: 76px;\n  height: 76px;\n  object-fit: contain;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 8px;\n}\n#apc-panel .apc-detail-main {\n  flex: 1 1 auto;\n  min-width: 0;\n}\n#apc-panel .apc-detail-title {\n  display: block;\n  margin: 2px 0 4px;\n  font-weight: 600;\n  color: var(--apc-ink);\n  text-decoration: none;\n  line-height: 1.35;\n}\n#apc-panel .apc-detail-title:hover {\n  color: var(--apc-link);\n  text-decoration: underline;\n}\n#apc-panel .apc-detail-meta {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 6px;\n  font-size: 12px;\n  color: var(--apc-ink-2);\n  margin-bottom: 10px;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-detail-now {\n  color: var(--apc-ink);\n  font-weight: 600;\n}\n#apc-panel .apc-detail-delta {\n  font-weight: 600;\n}\n#apc-panel .apc-detail-delta.up {\n  color: var(--apc-up);\n}\n#apc-panel .apc-detail-delta.down {\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-detail-label {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  font-size: 11px;\n  font-weight: 600;\n  letter-spacing: 0.02em;\n  text-transform: uppercase;\n  color: var(--apc-ink-2);\n  margin-bottom: 4px;\n}\n#apc-panel .apc-detail-count {\n  font-weight: 400;\n  text-transform: none;\n  letter-spacing: 0;\n  color: var(--apc-muted);\n}\n#apc-panel .apc-detail-history-row {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  flex-wrap: wrap;\n}\n#apc-panel .apc-spark {\n  flex: 0 0 auto;\n  display: block;\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.08);\n  border-radius: 6px;\n}\n#apc-panel .apc-points {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 4px 8px;\n  font-size: 12px;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-pt {\n  display: inline-flex;\n  flex-direction: column;\n  line-height: 1.2;\n}\n#apc-panel .apc-pt-t {\n  font-size: 10px;\n  color: var(--apc-muted);\n}\n#apc-panel .apc-pt-p {\n  color: var(--apc-ink-2);\n}\n#apc-panel .apc-pt.current .apc-pt-p {\n  color: var(--apc-ink);\n  font-weight: 600;\n}\n#apc-panel .apc-pt-arrow {\n  color: var(--apc-axis);\n}\n#apc-panel .apc-btn {\n  flex: 0 0 auto;\n  align-self: center;\n  padding: 6px 12px;\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--apc-ink);\n  background: #fff;\n  border: 1px solid rgba(11, 11, 11, 0.18);\n  border-radius: 999px;\n  text-decoration: none;\n  white-space: nowrap;\n  transition: background 0.12s, border-color 0.12s;\n}\n#apc-panel .apc-btn:hover {\n  background: var(--apc-plane);\n  border-color: rgba(11, 11, 11, 0.3);\n  text-decoration: none;\n}\n\n#apc-panel .apc-foot {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid var(--apc-grid);\n  font-size: 12px;\n  color: var(--apc-ink-2);\n}\n#apc-panel .apc-legend {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n}\n#apc-panel .apc-dot {\n  display: inline-block;\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n}\n#apc-panel .apc-dot + * {\n  margin-right: 8px;\n}\n#apc-panel .apc-dot.up {\n  background: var(--apc-up);\n}\n#apc-panel .apc-dot.down {\n  background: var(--apc-down);\n}\n#apc-panel .apc-net {\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-net b {\n  font-weight: 600;\n  color: var(--apc-ink);\n}\n#apc-panel .apc-net b.up {\n  color: var(--apc-up);\n}\n#apc-panel .apc-net b.down {\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-spacer {\n  flex: 1 1 auto;\n}\n#apc-panel .apc-sep {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-linkbtn {\n  appearance: none;\n  background: none;\n  border: 0;\n  margin: 0;\n  padding: 0;\n  font-size: 12px;\n  color: var(--apc-link);\n  cursor: pointer;\n}\n#apc-panel .apc-linkbtn:hover {\n  text-decoration: underline;\n}\n\n@media (max-width: 1100px) {\n  #apc-panel .apc-kpis {\n    grid-template-columns: repeat(3, minmax(0, 1fr));\n  }\n}\n@media (max-width: 860px) {\n  #apc-panel .apc-kpis {\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n  }\n  #apc-panel th.apc-bar,\n  #apc-panel td.apc-bar,\n  #apc-panel th.apc-thumb,\n  #apc-panel td.apc-thumb {\n    display: none;\n  }\n  #apc-panel .apc-details td {\n    padding-left: 14px;\n  }\n}\n\n#apc-panel th.apc-when,\n#apc-panel td.apc-when {\n  width: 72px;\n  white-space: nowrap;\n  color: var(--apc-muted);\n  font-size: 12px;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-name-wrap .apc-newdot {\n  flex: 0 0 auto;\n  width: 6px;\n  height: 6px;\n}\n#apc-panel .apc-name-text {\n  flex: 0 1 auto;\n  min-width: 0;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel .apc-detail-when {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-detail-actions {\n  flex: 0 0 auto;\n  align-self: center;\n  display: flex;\n  flex-direction: column;\n  align-items: flex-end;\n  gap: 8px;\n}\n#apc-panel .apc-forget {\n  color: var(--apc-muted);\n}\n#apc-panel .apc-forget:hover {\n  color: var(--apc-up);\n}\n#apc-panel .apc-clear {\n  color: var(--apc-muted);\n}\n@media (max-width: 860px) {\n  #apc-panel th.apc-when,\n  #apc-panel td.apc-when {\n    display: none;\n  }\n}\n\n\n#apc-panel.view-cards .apc-table,\n#apc-panel.view-list .apc-grid {\n  display: none;\n}\n#apc-panel .apc-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(208px, 1fr));\n  gap: 10px;\n  margin-bottom: 2px;\n}\n#apc-panel .apc-card {\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  min-width: 0;\n  background: var(--apc-surface);\n  border: 1px solid var(--apc-border);\n  border-top: 3px solid var(--apc-axis);\n  border-radius: 10px;\n  overflow: hidden;\n  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;\n}\n#apc-panel .apc-card.up {\n  border-top-color: var(--apc-up);\n}\n#apc-panel .apc-card.down {\n  border-top-color: var(--apc-down);\n}\n#apc-panel .apc-card:hover {\n  box-shadow: 0 4px 14px rgba(11, 11, 11, 0.1);\n  transform: translateY(-1px);\n}\n#apc-panel .apc-card-media {\n  position: relative;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  height: 118px;\n  padding: 10px;\n  background: #fff;\n  border-bottom: 1px solid #f0efec;\n  text-decoration: none;\n}\n#apc-panel .apc-card-img {\n  display: block;\n  max-width: 100%;\n  max-height: 100%;\n  width: auto;\n  height: auto;\n  object-fit: contain;\n}\n#apc-panel .apc-card-media .apc-thumb-empty {\n  width: 72px;\n  height: 72px;\n  border-radius: 10px;\n}\n#apc-panel .apc-card-new {\n  position: absolute;\n  top: 8px;\n  left: 8px;\n  width: 8px;\n  height: 8px;\n  box-shadow: 0 0 0 2px #fff;\n}\n#apc-panel .apc-card-ribbon {\n  position: absolute;\n  top: 8px;\n  right: 8px;\n}\n#apc-panel .apc-card-body {\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n  padding: 10px 11px 10px;\n}\n#apc-panel .apc-card-title {\n  display: -webkit-box;\n  -webkit-line-clamp: 2;\n  -webkit-box-orient: vertical;\n  overflow: hidden;\n  min-height: 34px;\n  font-size: 12.5px;\n  line-height: 17px;\n  color: var(--apc-ink);\n  text-decoration: none;\n}\n#apc-panel a.apc-card-title:hover {\n  color: var(--apc-link);\n  text-decoration: underline;\n}\n#apc-panel .apc-card-prices {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  flex-wrap: wrap;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-card-now {\n  font-size: 18px;\n  font-weight: 700;\n  letter-spacing: -0.01em;\n  color: var(--apc-ink);\n  white-space: nowrap;\n}\n#apc-panel .apc-card-was {\n  font-size: 12px;\n  color: var(--apc-muted);\n  text-decoration: line-through;\n  white-space: nowrap;\n}\n#apc-panel .apc-pill {\n  align-self: flex-start;\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 9px 2px 8px;\n  border-radius: 999px;\n  font-size: 12px;\n  font-weight: 600;\n  white-space: nowrap;\n  font-variant-numeric: tabular-nums;\n}\n#apc-panel .apc-pill.down {\n  background: #e6f4e6;\n  color: var(--apc-down-text);\n}\n#apc-panel .apc-pill.up {\n  background: #fbe9e9;\n  color: #b22c2c;\n}\n#apc-panel .apc-pill .apc-arrow {\n  font-size: 8px;\n}\n#apc-panel .apc-pill-pct {\n  font-weight: 500;\n  opacity: 0.85;\n  margin-left: 2px;\n}\n#apc-panel .apc-card-meta {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin-top: 2px;\n  font-size: 11px;\n  color: var(--apc-muted);\n}\n#apc-panel .apc-card-meta .apc-spark {\n  width: 110px;\n  height: 26px;\n  flex: 0 0 auto;\n  border: 0;\n  background: transparent;\n}\n#apc-panel .apc-card-when {\n  flex: 1 1 auto;\n  min-width: 0;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#apc-panel .apc-card-more {\n  flex: 0 0 auto;\n  margin-right: -6px;\n}\n#apc-panel .apc-card.expanded .apc-card-more {\n  transform: rotate(90deg);\n  color: var(--apc-ink);\n}\n#apc-panel .apc-card-details {\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n  padding: 8px 11px 10px;\n  border-top: 1px solid #f0efec;\n  background: var(--apc-plane);\n}\n#apc-panel .apc-card-details .apc-points {\n  font-size: 11px;\n}\n#apc-panel .apc-card.flash,\n#apc-panel .apc-row.flash td {\n  box-shadow: 0 0 0 3px rgba(42, 120, 214, 0.4);\n}\n#apc-panel .apc-row.flash td:first-child {\n  border-radius: 6px 0 0 6px;\n}\n#apc-panel .apc-row.flash td:last-child {\n  border-radius: 0 6px 6px 0;\n}\n#apc-panel .apc-empty-state {\n  grid-column: 1 / -1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 12px;\n  padding: 26px 14px;\n  color: var(--apc-muted);\n  background: var(--apc-plane);\n  border: 1px dashed var(--apc-grid);\n  border-radius: 10px;\n}\n#apc-panel .apc-empty td {\n  padding: 8px 0;\n}\n#apc-panel .apc-diag {\n  color: var(--apc-muted);\n}\n@media (prefers-reduced-motion: reduce) {\n  #apc-panel .apc-card,\n  #apc-panel .apc-stat,\n  #apc-panel .apc-hl {\n    transition: none;\n  }\n}\n";
   (document.head || document.documentElement).appendChild(s);
 })();
 
@@ -481,7 +481,16 @@
       winAll: 'All time',
       cards: 'Cards',
       list: 'List',
-      story: (p, d, u) => p + ': ' + (d === 1 ? '1 item' : d + ' items') + ' cheaper · ' + u + ' pricier',
+      period: 'Period',
+      sort: 'Sort',
+      sortDropFirst: 'Biggest drop first',
+      sortRiseFirst: 'Biggest rise first',
+      sortNewest: 'Newest first',
+      sortSaving: 'Biggest saving',
+      sortPriceHigh: 'Price: high to low',
+      sortPriceLow: 'Price: low to high',
+      sortName: 'Name A–Z',
+      none: '—',
       showAll: 'Show all time',
       diag: 'Copy diagnostics',
       diagDone: 'Diagnostics copied',
@@ -535,7 +544,16 @@
       winAll: 'Tüm zamanlar',
       cards: 'Kartlar',
       list: 'Liste',
-      story: (p, d, u) => p + ': ' + d + ' ürün ucuzladı · ' + u + ' ürün zamlandı',
+      period: 'Dönem',
+      sort: 'Sırala',
+      sortDropFirst: 'En çok düşen önce',
+      sortRiseFirst: 'En çok artan önce',
+      sortNewest: 'En yeni önce',
+      sortSaving: 'En çok tasarruf',
+      sortPriceHigh: 'Fiyat: yüksekten düşüğe',
+      sortPriceLow: 'Fiyat: düşükten yükseğe',
+      sortName: 'Ad A–Z',
+      none: '—',
       showAll: 'Tüm zamanları göster',
       diag: 'Teşhis kopyala',
       diagDone: 'Teşhis kopyalandı',
@@ -931,38 +949,99 @@
     return el('span', { class: 'apc-chip ' + (cls || ''), title: title || null }, text);
   }
 
-  function tile(label, value, sub, cls, item) {
+  function statTile(key, label, value, sub, extra) {
+    const active = prefs.filter === key;
     return el(
-      'div',
+      'button',
       {
-        class: 'apc-tile' + (item ? ' has-thumb apc-tile-link' : ''),
-        title: item ? item.name : null,
-        role: item ? 'button' : null,
-        tabindex: item ? '0' : null,
-        onclick: item ? () => jumpTo(item.key) : null,
-        onkeydown: item ? (e) => (e.key === 'Enter' || e.key === ' ' ? (e.preventDefault(), jumpTo(item.key)) : null) : null,
+        type: 'button',
+        class: 'apc-stat ' + key + (active ? ' active' : ''),
+        'data-filter': key,
+        'aria-pressed': active ? 'true' : 'false',
+        onclick: () => {
+          prefs.filter = key;
+          savePrefs();
+          refreshRows();
+        },
       },
-      el(
-        'div',
-        { class: 'apc-tile-body' },
-        el('div', { class: 'apc-tile-label' }, label),
-        el('div', { class: 'apc-tile-value ' + (cls || '') }, value),
-        sub ? el('div', { class: 'apc-tile-sub' }, sub) : null
-      ),
-      item && item.image ? thumb(item, 'apc-tile-thumb') : null
+      el('div', { class: 'apc-stat-label' }, label),
+      el('div', { class: 'apc-stat-value' }, value),
+      sub ? el('div', { class: 'apc-stat-sub' }, sub) : null,
+      extra || null
     );
   }
 
+  function spreadBar(s) {
+    const total = s.downCount + s.upCount;
+    if (!total) return null;
+    const down = (s.downCount / total) * 100;
+    return el(
+      'div',
+      { class: 'apc-spread', title: T.drops + ' ' + s.downCount + ' · ' + T.increases + ' ' + s.upCount, 'aria-hidden': 'true' },
+      s.downCount ? el('i', { class: 'down', style: 'width:' + down.toFixed(1) + '%' }) : null,
+      s.upCount ? el('i', { class: 'up', style: 'width:' + (100 - down).toFixed(1) + '%' }) : null
+    );
+  }
+
+  function highlight(label, item, cls) {
+    if (!item) {
+      return el('div', { class: 'apc-hl empty' }, el('div', { class: 'apc-hl-body' }, el('div', { class: 'apc-stat-label' }, label), el('div', { class: 'apc-stat-value' }, T.none)));
+    }
+    return el(
+      'button',
+      { type: 'button', class: 'apc-hl ' + cls, title: item.name, onclick: () => jumpTo(item.key) },
+      thumb(item, 'apc-hl-thumb'),
+      el(
+        'div',
+        { class: 'apc-hl-body' },
+        el('div', { class: 'apc-stat-label' }, label),
+        el('div', { class: 'apc-stat-value ' + cls }, APC.formatPct(item.pct, locale, true)),
+        el('div', { class: 'apc-stat-sub' }, item.name)
+      )
+    );
+  }
+
+  function periodLabel() {
+    return T['win' + prefs.window.charAt(0).toUpperCase() + prefs.window.slice(1)] || prefs.window;
+  }
+
   function tiles(s, ref) {
-    const down = s.biggestDown;
-    const up = s.biggestUp;
     return el(
       'div',
       { class: 'apc-kpis' },
-      tile(T.dropped, T.items(s.downCount), s.downCount ? money(s.downSum, ref, true) + ' ' + T.combined : null, s.downCount ? 'down' : ''),
-      tile(T.increased, T.items(s.upCount), s.upCount ? money(s.upSum, ref, true) + ' ' + T.combined : null, s.upCount ? 'up' : ''),
-      tile(T.biggestDrop, down ? APC.formatPct(down.pct, locale, true) : '—', down ? down.name : null, down ? 'down' : '', down),
-      tile(T.biggestIncrease, up ? APC.formatPct(up.pct, locale, true) : '—', up ? up.name : null, up ? 'up' : '', up)
+      statTile('all', periodLabel(), T.items(s.total), T.net + ' ' + money(s.net, ref, true), spreadBar(s)),
+      statTile('down', T.dropped, T.items(s.downCount), s.downCount ? money(s.downSum, ref, true) + ' ' + T.combined : T.none),
+      statTile('up', T.increased, T.items(s.upCount), s.upCount ? money(s.upSum, ref, true) + ' ' + T.combined : T.none),
+      highlight(T.biggestDrop, s.biggestDown, 'down'),
+      highlight(T.biggestIncrease, s.biggestUp, 'up')
+    );
+  }
+
+  const SORT_OPTIONS = [
+    ['pct:asc', 'sortDropFirst'],
+    ['pct:desc', 'sortRiseFirst'],
+    ['changedAt:desc', 'sortNewest'],
+    ['delta:asc', 'sortSaving'],
+    ['newPrice:desc', 'sortPriceHigh'],
+    ['newPrice:asc', 'sortPriceLow'],
+    ['name:asc', 'sortName'],
+  ];
+
+  function sortSelect() {
+    return el(
+      'select',
+      {
+        class: 'apc-select',
+        'aria-label': T.sort,
+        onchange: (e) => {
+          const [key, dir] = e.target.value.split(':');
+          prefs.sort = key;
+          prefs.dir = dir;
+          savePrefs();
+          refreshRows();
+        },
+      },
+      SORT_OPTIONS.map(([value, label]) => el('option', { value }, T[label]))
     );
   }
 
@@ -1181,17 +1260,19 @@
       ' ' + money(item.delta, item, true),
       el('span', { class: 'apc-pill-pct' }, pctText)
     );
-    const when = el(
-      'span',
-      { class: 'apc-card-when' },
-      formatDate(item.changedAt) + (entry && entry.points.length > 2 ? ' · ' + T.seen(entry.points.length) : '')
-    );
+    const when = el('span', { class: 'apc-card-when' }, formatDate(item.changedAt));
     const more = el(
       'button',
       { type: 'button', class: 'apc-chevron apc-card-more', 'aria-expanded': expanded ? 'true' : 'false', 'aria-label': T.details, onclick: () => toggleExpand(item.key) },
       '›'
     );
-    const meta = el('div', { class: 'apc-card-meta' }, entry ? sparklineSVG(entry, dir, 110, 26) : null, when, more);
+    const meta = el(
+      'div',
+      { class: 'apc-card-meta' },
+      entry ? el('span', { class: 'apc-card-spark', title: T.seen(entry.points.length) }, sparklineSVG(entry, dir, 110, 26)) : null,
+      when,
+      more
+    );
     return el(
       'article',
       { class: 'apc-card ' + dir + (item.isNew ? ' is-new' : '') + (expanded ? ' expanded' : ''), 'data-key': item.key },
@@ -1282,29 +1363,22 @@
       const rows = visible.length ? visible.flatMap((i) => row(i, state.summary)) : [el('tr', { class: 'apc-empty' }, el('td', { colspan: '8' }, emptyState()))];
       ui.tbody.replaceChildren(...rows);
     }
-    if (ui.seg) for (const b of ui.seg.querySelectorAll('button')) b.classList.toggle('active', b.dataset.filter === prefs.filter);
+    if (ui.panel) {
+      for (const b of ui.panel.querySelectorAll('.apc-stat')) {
+        const active = b.dataset.filter === prefs.filter;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      }
+    }
+    if (ui.sortSelect) {
+      const value = prefs.sort + ':' + prefs.dir;
+      ui.sortSelect.value = SORT_OPTIONS.some(([v]) => v === value) ? value : '';
+    }
     for (const b of ui.sortButtons || []) {
       const active = b.dataset.sort === prefs.sort;
       b.classList.toggle('active', active);
       b.querySelector('.apc-sortmark').textContent = active ? (prefs.dir === 'asc' ? '↑' : '↓') : '';
     }
-  }
-
-  function segButton(key, label) {
-    return el(
-      'button',
-      {
-        type: 'button',
-        class: 'apc-segbtn' + (prefs.filter === key ? ' active' : ''),
-        'data-filter': key,
-        onclick: () => {
-          prefs.filter = key;
-          savePrefs();
-          refreshRows();
-        },
-      },
-      label
-    );
   }
 
   function sortButton(key, label, cls) {
@@ -1372,13 +1446,7 @@
     ui.win = el('div', { class: 'apc-seg apc-win', role: 'group' }, WINDOWS.map(winButton));
     ui.viewSeg = el('div', { class: 'apc-seg apc-viewseg', role: 'group' }, viewButton('cards', '▦ ' + T.cards), viewButton('list', '☰ ' + T.list));
 
-    ui.seg = el(
-      'div',
-      { class: 'apc-seg', role: 'group' },
-      segButton('all', T.all + ' ' + s.total),
-      segButton('down', T.drops + ' ' + s.downCount),
-      segButton('up', T.increases + ' ' + s.upCount)
-    );
+    ui.sortSelect = sortSelect();
 
     ui.search =
       items.length > 5
@@ -1395,8 +1463,6 @@
         : null;
 
     const subtitleParts = [];
-    const periodLabel = T['win' + prefs.window.charAt(0).toUpperCase() + prefs.window.slice(1)] || prefs.window;
-    if (items.length) subtitleParts.push(T.story(periodLabel, s.downCount, s.upCount));
     if (state.tracked) subtitleParts.push(T.tracking(state.tracked));
     if (!state.live.length && items.length) subtitleParts.push(T.remembered);
     if (newCount) subtitleParts.push(T.newSince(newCount, formatDate(prevSeen && prevSeen.t)));
@@ -1526,9 +1592,15 @@
           ui.collapseBtn,
           el('div', null, el('div', { class: 'apc-title' }, T.title, el('span', { class: 'apc-badge' }, s.total)), subtitle)
         ),
-        el('div', { class: 'apc-controls' }, ui.search, ui.win, ui.seg, ui.viewSeg)
+        el('div', { class: 'apc-controls' }, ui.search, ui.viewSeg)
       ),
       tiles(s, ref),
+      el(
+        'div',
+        { class: 'apc-toolbar' },
+        el('div', { class: 'apc-toolbar-left' }, el('span', { class: 'apc-toolbar-label' }, T.period), ui.win),
+        el('label', { class: 'apc-sort' }, T.sort, ui.sortSelect)
+      ),
       ui.grid,
       ui.table,
       el(

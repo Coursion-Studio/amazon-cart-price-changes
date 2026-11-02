@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0 — 2026-11-02
+
+- Summary tiles now act as filters (all / dropped / increased) and the first
+  tile carries the period, the net change and a drop-vs-rise bar; the biggest
+  drop and biggest increase show the product picture and jump to the item.
+- A period + sort toolbar: sort menu in both views (biggest drop, biggest rise,
+  newest, biggest saving, price, name).
+- Picture-frame placeholder for items without a picture; card footer shows the
+  date only, the price count moved to the sparkline's tooltip.
+- New demo cart (test/make-fixture.py) with made-up products; README and store
+  screenshots regenerated from it.
+
 ## 1.0.0 — 2026-11-02
 
 First public release.

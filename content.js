@@ -49,7 +49,16 @@
       winAll: 'All time',
       cards: 'Cards',
       list: 'List',
-      story: (p, d, u) => p + ': ' + (d === 1 ? '1 item' : d + ' items') + ' cheaper · ' + u + ' pricier',
+      period: 'Period',
+      sort: 'Sort',
+      sortDropFirst: 'Biggest drop first',
+      sortRiseFirst: 'Biggest rise first',
+      sortNewest: 'Newest first',
+      sortSaving: 'Biggest saving',
+      sortPriceHigh: 'Price: high to low',
+      sortPriceLow: 'Price: low to high',
+      sortName: 'Name A–Z',
+      none: '—',
       showAll: 'Show all time',
       diag: 'Copy diagnostics',
       diagDone: 'Diagnostics copied',
@@ -103,7 +112,16 @@
       winAll: 'Tüm zamanlar',
       cards: 'Kartlar',
       list: 'Liste',
-      story: (p, d, u) => p + ': ' + d + ' ürün ucuzladı · ' + u + ' ürün zamlandı',
+      period: 'Dönem',
+      sort: 'Sırala',
+      sortDropFirst: 'En çok düşen önce',
+      sortRiseFirst: 'En çok artan önce',
+      sortNewest: 'En yeni önce',
+      sortSaving: 'En çok tasarruf',
+      sortPriceHigh: 'Fiyat: yüksekten düşüğe',
+      sortPriceLow: 'Fiyat: düşükten yükseğe',
+      sortName: 'Ad A–Z',
+      none: '—',
       showAll: 'Tüm zamanları göster',
       diag: 'Teşhis kopyala',
       diagDone: 'Teşhis kopyalandı',
@@ -499,38 +517,99 @@
     return el('span', { class: 'apc-chip ' + (cls || ''), title: title || null }, text);
   }
 
-  function tile(label, value, sub, cls, item) {
+  function statTile(key, label, value, sub, extra) {
+    const active = prefs.filter === key;
     return el(
-      'div',
+      'button',
       {
-        class: 'apc-tile' + (item ? ' has-thumb apc-tile-link' : ''),
-        title: item ? item.name : null,
-        role: item ? 'button' : null,
-        tabindex: item ? '0' : null,
-        onclick: item ? () => jumpTo(item.key) : null,
-        onkeydown: item ? (e) => (e.key === 'Enter' || e.key === ' ' ? (e.preventDefault(), jumpTo(item.key)) : null) : null,
+        type: 'button',
+        class: 'apc-stat ' + key + (active ? ' active' : ''),
+        'data-filter': key,
+        'aria-pressed': active ? 'true' : 'false',
+        onclick: () => {
+          prefs.filter = key;
+          savePrefs();
+          refreshRows();
+        },
       },
-      el(
-        'div',
-        { class: 'apc-tile-body' },
-        el('div', { class: 'apc-tile-label' }, label),
-        el('div', { class: 'apc-tile-value ' + (cls || '') }, value),
-        sub ? el('div', { class: 'apc-tile-sub' }, sub) : null
-      ),
-      item && item.image ? thumb(item, 'apc-tile-thumb') : null
+      el('div', { class: 'apc-stat-label' }, label),
+      el('div', { class: 'apc-stat-value' }, value),
+      sub ? el('div', { class: 'apc-stat-sub' }, sub) : null,
+      extra || null
     );
   }
 
+  function spreadBar(s) {
+    const total = s.downCount + s.upCount;
+    if (!total) return null;
+    const down = (s.downCount / total) * 100;
+    return el(
+      'div',
+      { class: 'apc-spread', title: T.drops + ' ' + s.downCount + ' · ' + T.increases + ' ' + s.upCount, 'aria-hidden': 'true' },
+      s.downCount ? el('i', { class: 'down', style: 'width:' + down.toFixed(1) + '%' }) : null,
+      s.upCount ? el('i', { class: 'up', style: 'width:' + (100 - down).toFixed(1) + '%' }) : null
+    );
+  }
+
+  function highlight(label, item, cls) {
+    if (!item) {
+      return el('div', { class: 'apc-hl empty' }, el('div', { class: 'apc-hl-body' }, el('div', { class: 'apc-stat-label' }, label), el('div', { class: 'apc-stat-value' }, T.none)));
+    }
+    return el(
+      'button',
+      { type: 'button', class: 'apc-hl ' + cls, title: item.name, onclick: () => jumpTo(item.key) },
+      thumb(item, 'apc-hl-thumb'),
+      el(
+        'div',
+        { class: 'apc-hl-body' },
+        el('div', { class: 'apc-stat-label' }, label),
+        el('div', { class: 'apc-stat-value ' + cls }, APC.formatPct(item.pct, locale, true)),
+        el('div', { class: 'apc-stat-sub' }, item.name)
+      )
+    );
+  }
+
+  function periodLabel() {
+    return T['win' + prefs.window.charAt(0).toUpperCase() + prefs.window.slice(1)] || prefs.window;
+  }
+
   function tiles(s, ref) {
-    const down = s.biggestDown;
-    const up = s.biggestUp;
     return el(
       'div',
       { class: 'apc-kpis' },
-      tile(T.dropped, T.items(s.downCount), s.downCount ? money(s.downSum, ref, true) + ' ' + T.combined : null, s.downCount ? 'down' : ''),
-      tile(T.increased, T.items(s.upCount), s.upCount ? money(s.upSum, ref, true) + ' ' + T.combined : null, s.upCount ? 'up' : ''),
-      tile(T.biggestDrop, down ? APC.formatPct(down.pct, locale, true) : '—', down ? down.name : null, down ? 'down' : '', down),
-      tile(T.biggestIncrease, up ? APC.formatPct(up.pct, locale, true) : '—', up ? up.name : null, up ? 'up' : '', up)
+      statTile('all', periodLabel(), T.items(s.total), T.net + ' ' + money(s.net, ref, true), spreadBar(s)),
+      statTile('down', T.dropped, T.items(s.downCount), s.downCount ? money(s.downSum, ref, true) + ' ' + T.combined : T.none),
+      statTile('up', T.increased, T.items(s.upCount), s.upCount ? money(s.upSum, ref, true) + ' ' + T.combined : T.none),
+      highlight(T.biggestDrop, s.biggestDown, 'down'),
+      highlight(T.biggestIncrease, s.biggestUp, 'up')
+    );
+  }
+
+  const SORT_OPTIONS = [
+    ['pct:asc', 'sortDropFirst'],
+    ['pct:desc', 'sortRiseFirst'],
+    ['changedAt:desc', 'sortNewest'],
+    ['delta:asc', 'sortSaving'],
+    ['newPrice:desc', 'sortPriceHigh'],
+    ['newPrice:asc', 'sortPriceLow'],
+    ['name:asc', 'sortName'],
+  ];
+
+  function sortSelect() {
+    return el(
+      'select',
+      {
+        class: 'apc-select',
+        'aria-label': T.sort,
+        onchange: (e) => {
+          const [key, dir] = e.target.value.split(':');
+          prefs.sort = key;
+          prefs.dir = dir;
+          savePrefs();
+          refreshRows();
+        },
+      },
+      SORT_OPTIONS.map(([value, label]) => el('option', { value }, T[label]))
     );
   }
 
@@ -749,17 +828,19 @@
       ' ' + money(item.delta, item, true),
       el('span', { class: 'apc-pill-pct' }, pctText)
     );
-    const when = el(
-      'span',
-      { class: 'apc-card-when' },
-      formatDate(item.changedAt) + (entry && entry.points.length > 2 ? ' · ' + T.seen(entry.points.length) : '')
-    );
+    const when = el('span', { class: 'apc-card-when' }, formatDate(item.changedAt));
     const more = el(
       'button',
       { type: 'button', class: 'apc-chevron apc-card-more', 'aria-expanded': expanded ? 'true' : 'false', 'aria-label': T.details, onclick: () => toggleExpand(item.key) },
       '›'
     );
-    const meta = el('div', { class: 'apc-card-meta' }, entry ? sparklineSVG(entry, dir, 110, 26) : null, when, more);
+    const meta = el(
+      'div',
+      { class: 'apc-card-meta' },
+      entry ? el('span', { class: 'apc-card-spark', title: T.seen(entry.points.length) }, sparklineSVG(entry, dir, 110, 26)) : null,
+      when,
+      more
+    );
     return el(
       'article',
       { class: 'apc-card ' + dir + (item.isNew ? ' is-new' : '') + (expanded ? ' expanded' : ''), 'data-key': item.key },
@@ -850,29 +931,22 @@
       const rows = visible.length ? visible.flatMap((i) => row(i, state.summary)) : [el('tr', { class: 'apc-empty' }, el('td', { colspan: '8' }, emptyState()))];
       ui.tbody.replaceChildren(...rows);
     }
-    if (ui.seg) for (const b of ui.seg.querySelectorAll('button')) b.classList.toggle('active', b.dataset.filter === prefs.filter);
+    if (ui.panel) {
+      for (const b of ui.panel.querySelectorAll('.apc-stat')) {
+        const active = b.dataset.filter === prefs.filter;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      }
+    }
+    if (ui.sortSelect) {
+      const value = prefs.sort + ':' + prefs.dir;
+      ui.sortSelect.value = SORT_OPTIONS.some(([v]) => v === value) ? value : '';
+    }
     for (const b of ui.sortButtons || []) {
       const active = b.dataset.sort === prefs.sort;
       b.classList.toggle('active', active);
       b.querySelector('.apc-sortmark').textContent = active ? (prefs.dir === 'asc' ? '↑' : '↓') : '';
     }
-  }
-
-  function segButton(key, label) {
-    return el(
-      'button',
-      {
-        type: 'button',
-        class: 'apc-segbtn' + (prefs.filter === key ? ' active' : ''),
-        'data-filter': key,
-        onclick: () => {
-          prefs.filter = key;
-          savePrefs();
-          refreshRows();
-        },
-      },
-      label
-    );
   }
 
   function sortButton(key, label, cls) {
@@ -940,13 +1014,7 @@
     ui.win = el('div', { class: 'apc-seg apc-win', role: 'group' }, WINDOWS.map(winButton));
     ui.viewSeg = el('div', { class: 'apc-seg apc-viewseg', role: 'group' }, viewButton('cards', '▦ ' + T.cards), viewButton('list', '☰ ' + T.list));
 
-    ui.seg = el(
-      'div',
-      { class: 'apc-seg', role: 'group' },
-      segButton('all', T.all + ' ' + s.total),
-      segButton('down', T.drops + ' ' + s.downCount),
-      segButton('up', T.increases + ' ' + s.upCount)
-    );
+    ui.sortSelect = sortSelect();
 
     ui.search =
       items.length > 5
@@ -963,8 +1031,6 @@
         : null;
 
     const subtitleParts = [];
-    const periodLabel = T['win' + prefs.window.charAt(0).toUpperCase() + prefs.window.slice(1)] || prefs.window;
-    if (items.length) subtitleParts.push(T.story(periodLabel, s.downCount, s.upCount));
     if (state.tracked) subtitleParts.push(T.tracking(state.tracked));
     if (!state.live.length && items.length) subtitleParts.push(T.remembered);
     if (newCount) subtitleParts.push(T.newSince(newCount, formatDate(prevSeen && prevSeen.t)));
@@ -1094,9 +1160,15 @@
           ui.collapseBtn,
           el('div', null, el('div', { class: 'apc-title' }, T.title, el('span', { class: 'apc-badge' }, s.total)), subtitle)
         ),
-        el('div', { class: 'apc-controls' }, ui.search, ui.win, ui.seg, ui.viewSeg)
+        el('div', { class: 'apc-controls' }, ui.search, ui.viewSeg)
       ),
       tiles(s, ref),
+      el(
+        'div',
+        { class: 'apc-toolbar' },
+        el('div', { class: 'apc-toolbar-left' }, el('span', { class: 'apc-toolbar-label' }, T.period), ui.win),
+        el('label', { class: 'apc-sort' }, T.sort, ui.sortSelect)
+      ),
       ui.grid,
       ui.table,
       el(
