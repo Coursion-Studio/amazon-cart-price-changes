@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="tr-tr">
+<head>
+<meta charset="utf-8">
+<title>Alışveriş Sepeti - Amazon.com.tr (fixture)</title>
+<style>
+  body { margin: 0; font: 13px/1.4 "Amazon Ember", Arial, sans-serif; color: #0f1111; background: #fff; }
+  .nav { background: #131921; color: #fff; height: 60px; display: flex; align-items: center; padding: 0 20px; gap: 24px; font-size: 14px; }
+  .nav b { font-size: 20px; letter-spacing: -0.02em; }
+  .nav .search { flex: 1; height: 38px; border-radius: 4px; background: #fff; }
+  .page { max-width: 1300px; margin: 18px auto; padding: 0 18px; }
+  h1 { font-weight: 400; font-size: 28px; margin: 0 0 14px; }
+  .a-alert { background: #fcf6e2; border: 1px solid #f0c14b; border-radius: 4px; padding: 14px 18px; margin-bottom: 14px; }
+  .a-alert-heading { margin: 0 0 12px; font-size: 17px; }
+  .a-alert-heading::before { content: "⚠️ "; }
+  .a-text-bold { font-weight: 700; }
+  ul.a-unordered-list { margin: 4px 0 2px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  a.a-link-normal { color: #007185; text-decoration: none; }
+  .a-color-price { color: #b12704; }
+  .a-expander-header { color: #007185; display: inline-block; margin: 2px 0 14px; }
+  .a-expander-header::before { content: "⌃ "; }
+  .cart-row { display: flex; gap: 16px; padding: 14px 0; border-top: 1px solid #ddd; }
+  .thumb { width: 120px; height: 120px; background: #eee; border-radius: 4px; }
+  html.shot .page { max-width: 1240px; margin: 12px auto; }
+  html.shot h1 { font-size: 22px; margin: 0 0 10px; }
+</style>
+<script>
+(function () {
+  const q = new URLSearchParams(location.search);
+  if (!q.has('seed')) return;
+  const day = 86400000;
+  const now = Date.now();
+  localStorage.clear();
+  localStorage.setItem('apc:seen', JSON.stringify({ t: now - 5 * day, keys: [] }));
+  const tl = { currency: 'TL', placement: 'suffix', group: 'saved' };
+  localStorage.setItem('apc:history', JSON.stringify({
+    B0C6ABCDEF: Object.assign({ name: 'hansgrohe Pulsify Select S duş seti, hortumlu ve tutuculu duş başlığı, 3 püskürtme türüne sahip duş başlığı, krom', href: '/dp/B0C6ABCDEF', seen: now - 19 * day, points: [{ t: null, p: 3299 }, { t: now - 41 * day, p: 3100 }, { t: now - 19 * day, p: 3534 }] }, tl),
+    B0D8ABCDEF: Object.assign({ name: 'Moliendo Finest Coffee Blonde Blend (Çekirdek) 250 g', href: '/dp/B0D8ABCDEF', seen: now - 12 * day, points: [{ t: null, p: 449 }, { t: now - 30 * day, p: 399 }, { t: now - 12 * day, p: 417 }] }, tl),
+    B0D4ABCDEF: Object.assign({ name: "Karaca Refika'dan XL Cam Çay Makinesi Chrome", href: '/dp/B0D4ABCDEF', seen: now - 6 * day, points: [{ t: null, p: 6899 }, { t: now - 6 * day, p: 6719.04 }] }, tl),
+    B0E1ABCDEF: Object.assign({ name: 'Anker 737 Power Bank (PowerCore 24K) 140W Üç Portlu Taşınabilir Şarj Cihazı', href: '/dp/B0E1ABCDEF', seen: now - 12 * day, points: [{ t: null, p: 2499 }, { t: now - 12 * day, p: 2199 }] }, tl),
+    B0E2ABCDEF: Object.assign({ name: 'Logitech MX Keys S Kablosuz Klavye, Akıllı Aydınlatma, Grafit', href: '/dp/B0E2ABCDEF', seen: now - 26 * day, points: [{ t: null, p: 4899 }, { t: now - 26 * day, p: 5299 }] }, tl),
+  }));
+  localStorage.setItem('apc:prefs', JSON.stringify({ sort: 'pct', dir: 'asc', filter: 'all', window: q.get('win') || 'all', view: q.get('view') || 'cards', showOriginal: false, collapsed: false }));
+})();
+</script>
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+<script>if (new URLSearchParams(location.search).has('shot')) document.documentElement.classList.add('shot');</script>
+<div class="nav"><b>amazon.com.tr</b><span>Teslimat adresi: İstanbul</span><div class="search"></div><span>Hesap ve Listeler</span><span>Sepet</span></div>
+<div class="page">
+<h1>Alışveriş Sepeti</h1>
+
+<div id="sc-cart-alert" class="a-box a-alert a-alert-warning sc-list-head-alert">
+  <div class="a-box-inner a-alert-container">
+    <h4 class="a-alert-heading">Sepetinizdeki ürünler için önemli mesajlar:</h4>
+    <div class="a-alert-content">
+      <div class="sc-list-head-alert-group">
+        <span class="a-text-bold">Kayıtlı ürünlerdeki 10 ürünün fiyatı değişti.</span><br>
+        <span>Sepetinizdeki ürünler her zaman ürün bilgi sayfalarında gösterilen güncel fiyatları yansıtır.</span>
+        <ul class="a-unordered-list a-nostyle a-vertical">
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C1ABCDEF">Energea MagMount Flex 360 Dönebilen Manyetik Araç İçi Telefon Tutucu - Siyah</a>, arttırıldı <span class="a-color-price">1.717,96 TL</span> olan eski fiyatı <span class="a-color-price">1.720,56 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C2ABCDEF">New Life Efa One Balık Yağı 45 Kapsül - 1020mg Omega 3-580mg EPA - 390mg DHA</a>, arttırıldı <span class="a-color-price">966,45 TL</span> olan eski fiyatı <span class="a-color-price">980,82 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C3ABCDEF">The Lord of the Rings Boxed Set</a>, arttırıldı <span class="a-color-price">6.280,95 TL</span> olan eski fiyatı <span class="a-color-price">6.701,71 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C4ABCDEF">Mcdodo OT-6850 140W Type-c MagSafe MacBook Şarj Dönüştürücü Adaptör</a>, arttırıldı <span class="a-color-price">1.138,00 TL</span> olan eski fiyatı <span class="a-color-price">1.139,05 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C5ABCDEF">Mcdodo MC-4651 10.000mAh 20W Metal Ultra İnce Manyetik Kablosuz - Powerbank Siyah</a>, arttırıldı <span class="a-color-price">2.099,00 TL</span> olan eski fiyatı <span class="a-color-price">2.149,00 TL</span> olarak değişti</span></li>
+        </ul>
+        <div class="a-expander-content">
+        <ul class="a-unordered-list a-nostyle a-vertical">
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C6ABCDEF">hansgrohe Pulsify Select S duş seti, hortumlu ve tutuculu duş başlığı, 3 püskürtme türüne sahip duş başlığı, krom</a>, arttırıldı <span class="a-color-price">3.534,00 TL</span> olan eski fiyatı <span class="a-color-price">5.568,00 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C7ABCDEF">Fender Running Logo Askı Gitar Askısı</a>, arttırıldı <span class="a-color-price">1.220,02 TL</span> olan eski fiyatı <span class="a-color-price">1.304,50 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C8ABCDEF">$100M Offers: How To Make Offers So Good People Feel Stupid Saying No</a>, arttırıldı <span class="a-color-price">2.446,98 TL</span> olan eski fiyatı <span class="a-color-price">2.483,68 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C9ABCDEF">Hansgrohe Isiflex Duş Hortumu 160 cm 28276000</a>, arttırıldı <span class="a-color-price">1.476,00 TL</span> olan eski fiyatı <span class="a-color-price">2.274,00 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0C10BCDEF">The Powerless &amp; Reckless Collection (Boxed Set): Powerless; Reckless</a>, arttırıldı <span class="a-color-price">1.816,62 TL</span> olan eski fiyatı <span class="a-color-price">1.843,87 TL</span> olarak değişti</span></li>
+        </ul>
+        </div>
+        <a class="a-expander-header" href="#">Son 5 adeti gizle</a>
+      </div>
+      <div class="sc-list-head-alert-group">
+        <span class="a-text-bold">Kayıtlı ürünlerdeki 9 ürünün fiyatı değişti.</span><br>
+        <span>Sepetinizdeki ürünler her zaman ürün bilgi sayfalarında gösterilen güncel fiyatları yansıtır.</span>
+        <ul class="a-unordered-list a-nostyle a-vertical">
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D1ABCDEF">SOGUD Duş Başlığı Filtresi Beyaz - Klor Kireç Tortu Pas Önleyici Duş Su Filtresi Aparatı - PP Pamuk Filtreli Banyo Arıtma Başlığı - Şeffaf Gövde Krom Detaylı Model - 2 Yedek Filtreli</a>, azaltıldı <span class="a-color-price">314,99 TL</span> olan eski fiyatı <span class="a-color-price">297,49 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D2ABCDEF">Nasiol Glasshield Araç Nano Yağmur Kaydırıcı Ve Su İtici Sprey-50 Ml-2 Yıl Etkili-Cam Koruma,Otomobil,Motosiklet Cam,Ayna Su Kaydırıcı,Yağmur Tutmaz Nano Kaplama</a>, azaltıldı <span class="a-color-price">507,84 TL</span> olan eski fiyatı <span class="a-color-price">492,00 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D3ABCDEF">Philips 7000Serisi 16in1, Erkek Bakım Seti,Yüz/Saç/Vücut/Sakal Tıraş Makinesi, Islak&amp;Kuru, MG7931/30</a>, azaltıldı <span class="a-color-price">2.883,00 TL</span> olan eski fiyatı <span class="a-color-price">2.699,00 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D4ABCDEF">Karaca Refika'dan XL Cam Çay Makinesi Chrome</a>, azaltıldı <span class="a-color-price">6.719,04 TL</span> olan eski fiyatı <span class="a-color-price">6.299,10 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D5ABCDEF">SOGUD Filtreli Musluk Başlığı Seti Beyaz - 360° Döner Su Tasarruflu Perlatör Aparatı - Arıtmalı Kireç Önleyici Mutfak Banyo Lavabo Ucu - Krom Kaplama Yüksek Basınçlı Model - 3 Yedek Filtreli</a>, azaltıldı <span class="a-color-price">314,99 TL</span> olan eski fiyatı <span class="a-color-price">297,49 TL</span> olarak değişti</span></li>
+        </ul>
+        <div class="a-expander-content">
+        <ul class="a-unordered-list a-nostyle a-vertical">
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D6ABCDEF">Edifier S360Db 2.1 Hoparlör Ve Subwoofer Hoparlör Sistemi, Bluetooth V4.1 Aptx</a>, azaltıldı <span class="a-color-price">53.195,00 TL</span> olan eski fiyatı <span class="a-color-price">50.499,00 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D7ABCDEF">SWEET VIEW 2'si 1 arada Yağ ve Yağ Püskürtücü, 470 ml Hava Fritöz Yağ Püskürtücü, Mutfak, Salata ve Barbekü için Cam Zeytinyağı Şişesi (Siyah)</a>, azaltıldı <span class="a-color-price">609,20 TL</span> olan eski fiyatı <span class="a-color-price">599,99 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D8ABCDEF">Moliendo Finest Coffee Blonde Blend (Çekirdek) 250 g</a>, azaltıldı <span class="a-color-price">417,00 TL</span> olan eski fiyatı <span class="a-color-price">375,00 TL</span> olarak değişti</span></li>
+          <li><span class="a-list-item"><a class="a-link-normal" href="/dp/B0D9ABCDEF">Philips OneBlade QP2824/10 Yüz&amp; Vücut Hibrit Tıraş Makinesi, Islak&amp;Kuru,1 Yedek Bıçak,3 Sakal Tarağı</a>, azaltıldı <span class="a-color-price">1.657,00 TL</span> olan eski fiyatı <span class="a-color-price">1.549,00 TL</span> olarak değişti</span></li>
+        </ul>
+        </div>
+        <a class="a-expander-header" href="#">Son 4 adeti gizle</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="sc-saved-cart" class="sc-list" style="margin-top:18px">
+  <h2 style="font-weight:400;font-size:20px;margin:0 0 8px">Daha sonra almak için kaydedildi (19 ürün)</h2>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+    <div class="sc-list-item" data-asin="B0C6ABCDEF" data-price="5568.00" data-itemtype="saved" style="width:120px"><a href="/dp/B0C6ABCDEF"><img class="sc-product-image" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%235b7a8c%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3Ehansgrohe%3C/text%3E%3C/svg%3E" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">hansgrohe Pulsify Select S duş seti, hortumlu ve tutuculu duş başlığı, 3 püskürtme türüne sahip duş başlığı, krom</span></div></div>
+    <div class="sc-list-item" data-asin="B0D8ABCDEF" data-price="375.00" data-itemtype="saved" style="width:120px"><a href="/dp/B0D8ABCDEF"><img class="sc-product-image" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%237a4a2a%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EMoliendo%3C/text%3E%3C/svg%3E" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">Moliendo Finest Coffee Blonde Blend (Çekirdek) 250 g</span></div></div>
+    <div class="sc-list-item" data-asin="B0D6ABCDEF" data-price="47899.00" data-itemtype="saved" style="width:120px"><a href="/dp/B0D6ABCDEF"><img class="sc-product-image" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%232f2f2f%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EEdifier%3C/text%3E%3C/svg%3E" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">Edifier S360Db 2.1 Hoparlör Ve Subwoofer Hoparlör Sistemi, Bluetooth V4.1 Aptx</span></div></div>
+    <div class="sc-list-item" data-asin="B0C3ABCDEF" data-price="6701.71" data-itemtype="saved" style="width:120px"><a href="/dp/B0C3ABCDEF"><img class="sc-product-image" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%238a6d3b%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3ELOTR%3C/text%3E%3C/svg%3E" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">The Lord of the Rings Boxed Set</span></div></div>
+    <div class="sc-list-item" data-asin="B0D4ABCDEF" data-price="6299.10" data-itemtype="saved" style="width:120px"><a href="/dp/B0D4ABCDEF"><img class="sc-product-image" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%233b6e8a%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EKaraca%3C/text%3E%3C/svg%3E" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">Karaca Refika'dan XL Cam Çay Makinesi Chrome</span></div></div>
+    <div class="sc-list-item" data-asin="B0C9ABCDEF" data-price="2274.00" data-itemtype="saved" style="width:120px"><a href="/dp/B0C9ABCDEF"><img class="sc-product-image" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%236b6b6b%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EIsiflex%3C/text%3E%3C/svg%3E"" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">Hansgrohe Isiflex Duş Hortumu 160 cm 28276000</span></div></div>
+    <div class="sc-list-item" data-asin="B0D3ABCDEF" data-price="2699.00" data-itemtype="saved" style="width:120px"><a href="/dp/B0D3ABCDEF"><img class="sc-product-image" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-a-dynamic-image='{"data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%231f4e79%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EPhilips%3C/text%3E%3C/svg%3E":[120,120]}'" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">Philips 7000Serisi 16in1, Erkek Bakım Seti,Yüz/Saç/Vücut/Sakal Tıraş Makinesi, Islak&amp;Kuru, MG7931/30</span></div></div>
+    <div class="sc-list-item" data-asin="B0C8ABCDEF" data-price="2483.68" data-itemtype="saved" style="width:120px"><a href="/dp/B0C8ABCDEF"><img class="sc-product-image" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%23b8860b%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3E$100M%3C/text%3E%3C/svg%3E" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">$100M Offers: How To Make Offers So Good People Feel Stupid Saying No</span></div></div>
+    <div class="sc-list-item" data-asin="B0E1ABCDEF" data-price="2199.00" data-itemtype="saved" style="width:120px"><a href="/dp/B0E1ABCDEF"><img class="sc-product-image" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%231b3a5c%27/%3E%3Ctext x=%2760%27 y=%2770%27 font-family=%27Helvetica%27 font-size=%2726%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EAnker%3C/text%3E%3C/svg%3E" width="120" height="120" alt=""></a><div style="font-size:12px;margin-top:6px"><span class="sc-product-title">Anker 737 Power Bank (PowerCore 24K) 140W Üç Portlu Taşınabilir Şarj Cihazı</span></div></div>
+  </div>
+</div>
+
+<div class="cart-row"><div class="thumb"></div><div><b>Sepetinizdeki ürün</b><br>Stokta var<br><span class="a-color-price">1.299,00 TL</span></div></div>
+</div>
+<script src="../../parse.js"></script>
+<script>
+(function () {
+  const q = new URLSearchParams(location.search);
+  if (q.has('nolive')) document.getElementById('sc-cart-alert').remove();
+})();
+</script>
+<script src="../../content.js"></script>
+<script>
+(function () {
+  const q = new URLSearchParams(location.search);
+  const key = q.get('expand');
+  if (!key) return;
+  const btn = document.querySelector('#apc-panel .apc-row[data-key="' + key + '"] .apc-chevron, #apc-panel .apc-card[data-key="' + key + '"] .apc-card-more');
+  if (btn) btn.click();
+})();
+</script>
+</body>
+</html>

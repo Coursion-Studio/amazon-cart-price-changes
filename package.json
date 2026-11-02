@@ -1,0 +1,15 @@
+{
+  "name": "amazon-cart-price-changes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser extension: Amazon cart and saved-for-later price changes as cards or a table, with history",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "shot": "test/shot.sh",
+    "package": "node scripts/build-userscript.js && scripts/package.sh",
+    "store-shots": "scripts/store-shots.sh",
+    "userscript": "node scripts/build-userscript.js"
+  },
+  "license": "MIT",
+  "repository": "github:Coursion-Studio/amazon-cart-price-changes"
+}
